@@ -1,0 +1,21 @@
+Math Check
+
+Wenjun Mao
+netID : wm56
+
+Just as I described previously in the proposal, the game is a FPS game in a rendered map, therefore the first and most crucial problem is collision detection.
+
+The math model for this problem is some what similar to the ray tracing problem.
+So just imagine a similar FPS game like Counter Strike or Call of Duty,
+the player class will keep track of the current position of the weapon and the direction of the weapon pointing at.
+We call them pos[x,y,z]         position 
+and dir[x,y,z]					normalized direction vector
+
+so we can get a set of points on the array.
+R(t)= pos + dir * t with t>0.0
+
+Then to build the model of the enemy to enable ray tracing.
+To make the model simpler, I am  thinking of instead of using complex models, multiple spherical hit zones will be defined on enemy that only hitting those zones will cause damage.
+
+So we are able to do multiple ray traces on those spheres.
+If a sphere zone is hit, corresponding hp will be subtracted from the enemy.
