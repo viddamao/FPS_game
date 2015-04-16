@@ -1,5 +1,6 @@
 package finalproject_team28;
 
+import java.awt.Point;
 import java.awt.event.KeyEvent;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -14,9 +15,6 @@ import javax.swing.JFrame;
 
 import com.jogamp.opengl.util.gl2.GLUT;
 
-
-
-
 import framework.JOGLFrame;
 import framework.Pixmap;
 import framework.Scene;
@@ -26,7 +24,7 @@ public class GameView extends Scene {
     private final String DEFAULT_MAP_FILE = "img/iceworld.jpg";
     private final int MAP_ID = 1;
     private final float HEIGHT_RATIO = 0.25f;
-    
+
     private int myRenderMode;
     private int myStepSize;
     private ArrayList<List<Face>> myFaces;
@@ -44,7 +42,7 @@ public class GameView extends Scene {
     private boolean MOVE_LEFT = false;
     private boolean OBJECT_ASCEND = false;
     private boolean OBJECT_DESCEND = false;
-    
+
     public GameView(String[] args) {
 	super("Shooting Game");
 
@@ -65,7 +63,7 @@ public class GameView extends Scene {
 	myScale = 0.05f;
 	myStepSize = 1;
 	isCompiled = false;
-	
+
 	myRenderMode = GL2GL3.GL_QUADS;
 	myMapRenderer = MapRenderer.getMapRenderer();
 	myMapRenderer.init(myHeightMap, myStepSize);
@@ -77,17 +75,17 @@ public class GameView extends Scene {
 
     @Override
     public void display(GL2 gl, GLU glu, GLUT glut) {
-	if (!isCompiled ) {
-	gl.glDeleteLists(MAP_ID, 1);
-	gl.glNewList(MAP_ID, GL2.GL_COMPILE);
-	drawMap(gl, glu, glut);
-	gl.glEndList();
-	isCompiled = true;
+	if (!isCompiled) {
+	    gl.glDeleteLists(MAP_ID, 1);
+	    gl.glNewList(MAP_ID, GL2.GL_COMPILE);
+	    drawMap(gl, glu, glut);
+	    gl.glEndList();
+	    isCompiled = true;
 	}
-	
+
 	gl.glScalef(myScale, myScale * HEIGHT_RATIO, myScale);
 	gl.glCallList(MAP_ID);
-	
+
     }
 
     private void drawMap(GL2 gl, GLU glu, GLUT glut) {
@@ -100,17 +98,17 @@ public class GameView extends Scene {
 	    }
 	}
 	gl.glEnd();
-	
+
     }
 
     @Override
     public void setCamera(GL2 gl, GLU glu, GLUT glut) {
-	glu.gluLookAt(0, 7, -33, // from position
-		0, 5, 20, // to position
+	glu.gluLookAt(0, 12, -27, // from position
+		0, 7, 10, // to position
 		0, 0, 1); // up direction
 
     }
-    
+
     /**
      * Establish lights in the scene.
      */
@@ -132,40 +130,41 @@ public class GameView extends Scene {
      */
     @Override
     public void keyPressed(int keyCode) {
-	 switch (keyCode) {
-	 case KeyEvent.VK_PERIOD:
-		myScale += 0.01f;
-		break;
-	    case KeyEvent.VK_COMMA:
-		myScale -= 0.01f;
-		break;
-	    case KeyEvent.VK_W:
-		MOVE_FORWARD = true;
-		break;
-	    case KeyEvent.VK_S:
-		MOVE_BACKWARD = true;
-		break;
-	    case KeyEvent.VK_D:
-		MOVE_RIGHT = true;
-		break;
-	    case KeyEvent.VK_A:
-		MOVE_LEFT = true;
-		break;
-	    case KeyEvent.VK_U:
-		OBJECT_ASCEND = true;
-		break;
-	    case KeyEvent.VK_I:
-		OBJECT_DESCEND = true;
-		break;
-	 }
+	switch (keyCode) {
+	case KeyEvent.VK_PERIOD:
+	    myScale += 0.01f;
+	    break;
+	case KeyEvent.VK_COMMA:
+	    myScale -= 0.01f;
+	    break;
+	case KeyEvent.VK_W:
+	    MOVE_FORWARD = true;
+	    break;
+	case KeyEvent.VK_S:
+	    MOVE_BACKWARD = true;
+	    break;
+	case KeyEvent.VK_D:
+	    MOVE_RIGHT = true;
+	    break;
+	case KeyEvent.VK_A:
+	    MOVE_LEFT = true;
+	    break;
+	case KeyEvent.VK_U:
+	    OBJECT_ASCEND = true;
+	    break;
+	case KeyEvent.VK_I:
+	    OBJECT_DESCEND = true;
+	    break;
+	}
     }
-    
+
     /**
      * Animate the scene by changing its state slightly.
      */
     @Override
     public void animate(GL2 gl, GLU glu, GLUT glut) {
 	if (!INIT_DONE) {
+	    gl.glTranslatef(0, 7.0f, 0);
 	    gl.glPushMatrix();
 	    INIT_DONE = true;
 	}
@@ -175,19 +174,19 @@ public class GameView extends Scene {
 	    INIT_DONE = false;
 	}
 	if (OBJECT_ASCEND) {
-	    gl.glRotatef(-0.25f, 1, 0, 0);
+	    gl.glTranslatef(0, -0.1f, 0);
 	    OBJECT_ASCEND = false;
 	}
 	if (OBJECT_DESCEND) {
-	    gl.glRotatef(0.25f, 1, 0, 0);
+	    gl.glTranslatef(0, 0.1f, 0);
 	    OBJECT_DESCEND = false;
 	}
 	if (MOVE_RIGHT) {
-	    gl.glRotatef(0.25f, 0, 0, 1);
+	    gl.glTranslatef(-0.1f, 0, 0);
 	    MOVE_RIGHT = false;
 	}
 	if (MOVE_LEFT) {
-	    gl.glRotatef(-0.25f, 0, 0, 1);
+	    gl.glTranslatef(0.1f, 0, 0);
 	    MOVE_LEFT = false;
 	}
 	if (MOVE_FORWARD) {
@@ -195,10 +194,43 @@ public class GameView extends Scene {
 	    MOVE_FORWARD = false;
 	}
 	if (MOVE_BACKWARD) {
-	    gl.glTranslatef(0, 0, 0.1f);
+	    gl.glTranslatef(0, 0, -0.1f);
 	    MOVE_BACKWARD = false;
 	}
-	
+
+    }
+
+    
+    /**
+     * Respond to the mouse being moved in the canvas.
+     *
+     * @param pt current position of the mouse
+     */
+
+    @Override
+    public void mouseMoved (Point pt) {
+        // by default, do nothing
+    }
+    
+    /**
+     * Respond to the press and release of the mouse.
+     *
+     * @param pt current position of the mouse
+     * @param button mouse button that was clicked
+     */
+    @Override
+    public void mouseClicked (Point pt, int button) {
+        // by default, do nothing
+    }
+    
+    
+    /**
+     * Called when the mouse is pressed within the canvas and it hits something.
+     */
+
+    @Override
+    public void selectObject (GL2 gl, GLU glu, GLUT glut, int numSelected, int[] selectInfo) {
+        // by default, do nothing
     }
     public static void main(String[] args) {
 	new JOGLFrame(new GameView(args));
