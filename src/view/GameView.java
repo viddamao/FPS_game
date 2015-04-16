@@ -31,8 +31,9 @@ public class GameView extends Scene {
     private final float HEIGHT_RATIO = 0.25f;
     private final double SCREEN_WIDTH_CENTER = 350;
     private final double SCREEN_HEIGHT_CENTER = 350;
+    private final double SPEED = 0.01;
     
-    private final static float zPosition=9;
+    private final static float zPosition=-20;
     private final static double LOOK_AT_DIST = 100;
 
     private int myRenderMode;
