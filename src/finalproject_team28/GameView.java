@@ -1,5 +1,6 @@
 package finalproject_team28;
 
+import java.awt.event.KeyEvent;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,14 +15,17 @@ import javax.swing.JFrame;
 import com.jogamp.opengl.util.gl2.GLUT;
 
 
+
+
 import framework.JOGLFrame;
 import framework.Pixmap;
 import framework.Scene;
 
 public class GameView extends Scene {
 
-    private final String DEFAULT_MAP_FILE = "img/sierra_elev.jpg";
+    private final String DEFAULT_MAP_FILE = "img/iceworld.jpg";
     private final int MAP_ID = 1;
+    private final float HEIGHT_RATIO = 0.25f;
     
     private int myRenderMode;
     private int myStepSize;
@@ -30,6 +34,17 @@ public class GameView extends Scene {
 
     private MapRenderer myMapRenderer;
 
+    private float myScale;
+    private boolean INIT_DONE = false;
+    private boolean RESET_VIEW = false;
+    private boolean isCompiled = false;
+    private boolean MOVE_FORWARD = false;
+    private boolean MOVE_BACKWARD = false;
+    private boolean MOVE_RIGHT = false;
+    private boolean MOVE_LEFT = false;
+    private boolean OBJECT_ASCEND = false;
+    private boolean OBJECT_DESCEND = false;
+    
     public GameView(String[] args) {
 	super("Shooting Game");
 
@@ -47,27 +62,31 @@ public class GameView extends Scene {
     public void init(GL2 gl, GLU glu, GLUT glut) {
 	myFaces = new ArrayList<List<Face>>();
 	myRenderMode = GL2GL3.GL_QUADS;
-	gl.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-
+	myScale = 0.05f;
+	myStepSize = 1;
+	isCompiled = false;
+	
 	myRenderMode = GL2GL3.GL_QUADS;
-
 	myMapRenderer = MapRenderer.getMapRenderer();
 	myMapRenderer.init(myHeightMap, myStepSize);
 	myMapRenderer.build();
 
-	/* initialize viewing values */
-	gl.glMatrixMode(gl.GL_PROJECTION);
-	gl.glLoadIdentity();
-	gl.glOrtho(0.0, 1.0, 0.0, 1.0, -1.0, 1.0);
+	// make all normals unit length
+	gl.glEnable(GLLightingFunc.GL_NORMALIZE);
     }
 
     @Override
     public void display(GL2 gl, GLU glu, GLUT glut) {
+	if (!isCompiled ) {
 	gl.glDeleteLists(MAP_ID, 1);
 	gl.glNewList(MAP_ID, GL2.GL_COMPILE);
-
 	drawMap(gl, glu, glut);
 	gl.glEndList();
+	isCompiled = true;
+	}
+	
+	gl.glScalef(myScale, myScale * HEIGHT_RATIO, myScale);
+	gl.glCallList(MAP_ID);
 	
     }
 
@@ -88,7 +107,7 @@ public class GameView extends Scene {
     public void setCamera(GL2 gl, GLU glu, GLUT glut) {
 	glu.gluLookAt(0, 7, -33, // from position
 		0, 5, 20, // to position
-		0, 0, 0); // up direction
+		0, 0, 1); // up direction
 
     }
     
@@ -113,9 +132,74 @@ public class GameView extends Scene {
      */
     @Override
     public void keyPressed(int keyCode) {
-	//TODO add key Events
+	 switch (keyCode) {
+	 case KeyEvent.VK_PERIOD:
+		myScale += 0.01f;
+		break;
+	    case KeyEvent.VK_COMMA:
+		myScale -= 0.01f;
+		break;
+	    case KeyEvent.VK_W:
+		MOVE_FORWARD = true;
+		break;
+	    case KeyEvent.VK_S:
+		MOVE_BACKWARD = true;
+		break;
+	    case KeyEvent.VK_D:
+		MOVE_RIGHT = true;
+		break;
+	    case KeyEvent.VK_A:
+		MOVE_LEFT = true;
+		break;
+	    case KeyEvent.VK_U:
+		OBJECT_ASCEND = true;
+		break;
+	    case KeyEvent.VK_I:
+		OBJECT_DESCEND = true;
+		break;
+	 }
     }
     
+    /**
+     * Animate the scene by changing its state slightly.
+     */
+    @Override
+    public void animate(GL2 gl, GLU glu, GLUT glut) {
+	if (!INIT_DONE) {
+	    gl.glPushMatrix();
+	    INIT_DONE = true;
+	}
+	if (RESET_VIEW) {
+	    gl.glPopMatrix();
+	    RESET_VIEW = false;
+	    INIT_DONE = false;
+	}
+	if (OBJECT_ASCEND) {
+	    gl.glRotatef(-0.25f, 1, 0, 0);
+	    OBJECT_ASCEND = false;
+	}
+	if (OBJECT_DESCEND) {
+	    gl.glRotatef(0.25f, 1, 0, 0);
+	    OBJECT_DESCEND = false;
+	}
+	if (MOVE_RIGHT) {
+	    gl.glRotatef(0.25f, 0, 0, 1);
+	    MOVE_RIGHT = false;
+	}
+	if (MOVE_LEFT) {
+	    gl.glRotatef(-0.25f, 0, 0, 1);
+	    MOVE_LEFT = false;
+	}
+	if (MOVE_FORWARD) {
+	    gl.glTranslatef(0, 0, 0.1f);
+	    MOVE_FORWARD = false;
+	}
+	if (MOVE_BACKWARD) {
+	    gl.glTranslatef(0, 0, 0.1f);
+	    MOVE_BACKWARD = false;
+	}
+	
+    }
     public static void main(String[] args) {
 	new JOGLFrame(new GameView(args));
     }
