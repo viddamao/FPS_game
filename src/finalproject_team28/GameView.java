@@ -1,5 +1,6 @@
 package finalproject_team28;
 
+import java.awt.MouseInfo;
 import java.awt.Point;
 import java.awt.event.KeyEvent;
 import java.io.IOException;
@@ -21,15 +22,16 @@ import framework.Scene;
 
 public class GameView extends Scene {
 
-    private final String DEFAULT_MAP_FILE = "img/iceworld.jpg";
+    private final String DEFAULT_MAP_FILE = "img/iceworld_0.bmp";
     private final int MAP_ID = 1;
     private final float HEIGHT_RATIO = 0.25f;
+    private final double SCREEN_WIDTH_CENTER = 350;
+    private final double SCREEN_HEIGHT_CENTER = 350;
 
     private int myRenderMode;
     private int myStepSize;
     private ArrayList<List<Face>> myFaces;
     private Pixmap myHeightMap;
-
     private MapRenderer myMapRenderer;
 
     private float myScale;
@@ -43,9 +45,13 @@ public class GameView extends Scene {
     private boolean OBJECT_ASCEND = false;
     private boolean OBJECT_DESCEND = false;
 
+    private Point myMouseLocation = new Point();
+    private double xDelta, yDelta;
+    private boolean MOUSE_MOVED = false;
+    private double mouseSensitivity = 1;
+
     public GameView(String[] args) {
 	super("Shooting Game");
-
 	String name = (args.length > 1) ? args[0] : DEFAULT_MAP_FILE;
 	try {
 	    myHeightMap = new Pixmap((args.length > 1) ? args[0]
@@ -58,11 +64,13 @@ public class GameView extends Scene {
     }
 
     public void init(GL2 gl, GLU glu, GLUT glut) {
+	
 	myFaces = new ArrayList<List<Face>>();
 	myRenderMode = GL2GL3.GL_QUADS;
 	myScale = 0.05f;
 	myStepSize = 1;
 	isCompiled = false;
+	myMouseLocation = MouseInfo.getPointerInfo().getLocation();
 
 	myRenderMode = GL2GL3.GL_QUADS;
 	myMapRenderer = MapRenderer.getMapRenderer();
@@ -71,6 +79,7 @@ public class GameView extends Scene {
 
 	// make all normals unit length
 	gl.glEnable(GLLightingFunc.GL_NORMALIZE);
+	gl.glEnable(GLLightingFunc.GL_COLOR_MATERIAL);
     }
 
     @Override
@@ -103,7 +112,7 @@ public class GameView extends Scene {
 
     @Override
     public void setCamera(GL2 gl, GLU glu, GLUT glut) {
-	glu.gluLookAt(0, 12, -27, // from position
+	glu.gluLookAt(0, 12, -20, // from position
 		0, 7, 10, // to position
 		0, 0, 1); // up direction
 
@@ -131,6 +140,9 @@ public class GameView extends Scene {
     @Override
     public void keyPressed(int keyCode) {
 	switch (keyCode) {
+	case KeyEvent.VK_R:
+	    RESET_VIEW = true;
+	    break;
 	case KeyEvent.VK_PERIOD:
 	    myScale += 0.01f;
 	    break;
@@ -164,7 +176,6 @@ public class GameView extends Scene {
     @Override
     public void animate(GL2 gl, GLU glu, GLUT glut) {
 	if (!INIT_DONE) {
-	    gl.glTranslatef(0, 7.0f, 0);
 	    gl.glPushMatrix();
 	    INIT_DONE = true;
 	}
@@ -197,43 +208,59 @@ public class GameView extends Scene {
 	    gl.glTranslatef(0, 0, -0.1f);
 	    MOVE_BACKWARD = false;
 	}
-
+	if (MOUSE_MOVED) {
+	    gl.glRotatef((float) (xDelta / 500 * mouseSensitivity ), 0, 1, 0);
+	    gl.glRotatef((float) (yDelta / 500 * mouseSensitivity), 1, 0, 0);
+	    MOUSE_MOVED = false;
+	}
     }
 
-    
     /**
      * Respond to the mouse being moved in the canvas.
      *
-     * @param pt current position of the mouse
+     * @param pt
+     *            current position of the mouse
      */
 
     @Override
-    public void mouseMoved (Point pt) {
-        // by default, do nothing
+    public void mouseMoved(Point pt) {
+	Point newMouseLocation = MouseInfo.getPointerInfo().getLocation();
+	MOUSE_MOVED = true;
+	xDelta = newMouseLocation.getX() - SCREEN_WIDTH_CENTER;
+	yDelta = newMouseLocation.getY() - SCREEN_HEIGHT_CENTER;
+	// System.out.print(myMouseLocation.getX());
+	// System.out.print("  ");
+	// System.out.println(myMouseLocation.getY());
+
+	myMouseLocation = newMouseLocation;
     }
-    
+
     /**
      * Respond to the press and release of the mouse.
      *
-     * @param pt current position of the mouse
-     * @param button mouse button that was clicked
+     * @param pt
+     *            current position of the mouse
+     * @param button
+     *            mouse button that was clicked
      */
     @Override
-    public void mouseClicked (Point pt, int button) {
-        // by default, do nothing
+    public void mouseClicked(Point pt, int button) {
+	// by default, do nothing
     }
-    
-    
+
     /**
      * Called when the mouse is pressed within the canvas and it hits something.
      */
 
     @Override
-    public void selectObject (GL2 gl, GLU glu, GLUT glut, int numSelected, int[] selectInfo) {
-        // by default, do nothing
+    public void selectObject(GL2 gl, GLU glu, GLUT glut, int numSelected,
+	    int[] selectInfo) {
+	// by default, do nothing
     }
+
     public static void main(String[] args) {
-	new JOGLFrame(new GameView(args));
+	JOGLFrame myFrame = new JOGLFrame(new GameView(args));
+	myFrame.setResizable(false);
     }
 
 }
