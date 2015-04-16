@@ -1,8 +1,10 @@
-package finalproject_team28;
+package view;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import model.Face;
+import model.Vertex;
 import framework.Pixmap;
 
 public class MapRenderer {

@@ -1,10 +1,12 @@
-package finalproject_team28;
+package model;
 
 import java.util.ArrayList;
 import java.util.Collections;
 
 import javax.media.opengl.GL2;
 import javax.media.opengl.glu.GLU;
+
+import view.MapRenderer;
 
 import com.jogamp.opengl.util.gl2.GLUT;
 

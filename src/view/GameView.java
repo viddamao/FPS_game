@@ -1,8 +1,9 @@
-package finalproject_team28;
+package view;
 
 import java.awt.MouseInfo;
 import java.awt.Point;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,6 +15,8 @@ import javax.media.opengl.fixedfunc.GLLightingFunc;
 import javax.media.opengl.glu.GLU;
 import javax.swing.JFrame;
 
+import model.Face;
+
 import com.jogamp.opengl.util.gl2.GLUT;
 
 import framework.JOGLFrame;
@@ -22,11 +25,15 @@ import framework.Scene;
 
 public class GameView extends Scene {
 
+    private static JOGLFrame myFrame;
     private final String DEFAULT_MAP_FILE = "img/iceworld_0.bmp";
     private final int MAP_ID = 1;
     private final float HEIGHT_RATIO = 0.25f;
     private final double SCREEN_WIDTH_CENTER = 350;
     private final double SCREEN_HEIGHT_CENTER = 350;
+    
+    private final static float zPosition=9;
+    private final static double LOOK_AT_DIST = 100;
 
     private int myRenderMode;
     private int myStepSize;
@@ -45,10 +52,13 @@ public class GameView extends Scene {
     private boolean OBJECT_ASCEND = false;
     private boolean OBJECT_DESCEND = false;
 
-    private Point myMouseLocation = new Point();
-    private double xDelta, yDelta;
+    private float xPos = 0,yPos = 1,zPos=zPosition;
+    private float xLookAt = 0, yLookAt = 0 , zLookAt = 100;
+    private float xStep,zStep;
+    private float viewAngle;
     private boolean MOUSE_MOVED = false;
-    private double mouseSensitivity = 1;
+    private MouseController myMouseController;
+    private Point myMouseLocation;
 
     public GameView(String[] args) {
 	super("Shooting Game");
@@ -64,14 +74,29 @@ public class GameView extends Scene {
     }
 
     public void init(GL2 gl, GLU glu, GLUT glut) {
-	
+
 	myFaces = new ArrayList<List<Face>>();
 	myRenderMode = GL2GL3.GL_QUADS;
 	myScale = 0.05f;
 	myStepSize = 1;
+	
+	viewAngle=90;
+	xStep = (float) Math.cos( Math.toRadians(viewAngle)); // step distances
+	zStep = (float) Math.sin( Math.toRadians(viewAngle));
+	 
+	 xLookAt = (float) (xPos + (LOOK_AT_DIST * xStep)); // look-at posn
+	 yLookAt = 0;
+	 zLookAt = (float) (zPos + (LOOK_AT_DIST * zStep));
 	isCompiled = false;
 	myMouseLocation = MouseInfo.getPointerInfo().getLocation();
-
+	try {
+	    myMouseController = new MouseController();
+	    myMouseController.setFrame(myFrame);
+	} catch (Exception e) {
+	    // TODO Auto-generated catch block
+	    e.printStackTrace();
+	}
+	
 	myRenderMode = GL2GL3.GL_QUADS;
 	myMapRenderer = MapRenderer.getMapRenderer();
 	myMapRenderer.init(myHeightMap, myStepSize);
@@ -112,8 +137,8 @@ public class GameView extends Scene {
 
     @Override
     public void setCamera(GL2 gl, GLU glu, GLUT glut) {
-	glu.gluLookAt(0, 12, -20, // from position
-		0, 7, 10, // to position
+	glu.gluLookAt(xPos, yPos, zPos, // from position
+		xLookAt, yLookAt, zLookAt, // to position
 		0, 0, 1); // up direction
 
     }
@@ -209,8 +234,15 @@ public class GameView extends Scene {
 	    MOVE_BACKWARD = false;
 	}
 	if (MOUSE_MOVED) {
-	    gl.glRotatef((float) (xDelta / 500 * mouseSensitivity ), 0, 1, 0);
-	    gl.glRotatef((float) (yDelta / 500 * mouseSensitivity), 1, 0, 0);
+	    // gl.glRotatef((float) (xDelta / 500 * mouseSensitivity ), 0, 1,
+	    // 0);
+	    // gl.glRotatef((float) (yDelta / 500 * mouseSensitivity), 1, 0, 0);
+	    
+	//    xDir=xPos+(myMouseController.dmx/2000+1);
+	//    yDir=0;
+	 //   zDir=zPos+(myMouseController.dmy/2000+1);
+	    
+	    
 	    MOUSE_MOVED = false;
 	}
     }
@@ -226,13 +258,15 @@ public class GameView extends Scene {
     public void mouseMoved(Point pt) {
 	Point newMouseLocation = MouseInfo.getPointerInfo().getLocation();
 	MOUSE_MOVED = true;
-	xDelta = newMouseLocation.getX() - SCREEN_WIDTH_CENTER;
-	yDelta = newMouseLocation.getY() - SCREEN_HEIGHT_CENTER;
-	// System.out.print(myMouseLocation.getX());
-	// System.out.print("  ");
-	// System.out.println(myMouseLocation.getY());
-
-	myMouseLocation = newMouseLocation;
+//	xDelta = newMouseLocation.getX() - SCREEN_WIDTH_CENTER;
+//	yDelta = newMouseLocation.getY() - SCREEN_HEIGHT_CENTER;
+//	// System.out.print(myMouseLocation.getX());
+//	// System.out.print("  ");
+//	// System.out.println(myMouseLocation.getY());
+//
+//	myMouseLocation = newMouseLocation;
+	
+	myMouseController.mouseMoved(newMouseLocation);
     }
 
     /**
@@ -259,7 +293,8 @@ public class GameView extends Scene {
     }
 
     public static void main(String[] args) {
-	JOGLFrame myFrame = new JOGLFrame(new GameView(args));
+	
+	myFrame = new JOGLFrame(new GameView(args));
 	myFrame.setResizable(false);
     }
 

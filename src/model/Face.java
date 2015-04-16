@@ -1,4 +1,4 @@
-package finalproject_team28;
+package model;
 
 import java.util.ArrayList;
 
@@ -74,7 +74,7 @@ public class Face implements Comparable {
 	    float[] normal = v.getVertexNormal(gl, glu, glut);
 	    float z = v.getY();
 	    gl.glColor3f((z / 255) * .84f, (z / 255) * .86f, (z / 255) * .86f);
-	    //gl.glColor3f(1.0f, 1.0f, 1.0f);
+	    // gl.glColor3f(1.0f, 1.0f, 1.0f);
 	    gl.glNormal3f(normal[0], normal[1], normal[2]);
 	    gl.glVertex3f(v.getX(), v.getY(), v.getZ());
 	}
