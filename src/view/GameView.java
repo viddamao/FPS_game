@@ -5,12 +5,16 @@ import java.awt.Point;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 import javax.media.opengl.GL2GL3;
+import javax.media.opengl.GLAutoDrawable;
+import javax.media.opengl.GLEventListener;
+import javax.media.opengl.GLProfile;
 import javax.media.opengl.fixedfunc.GLLightingFunc;
 import javax.media.opengl.glu.GLU;
 import javax.swing.JFrame;
@@ -18,28 +22,32 @@ import javax.swing.JFrame;
 import model.Face;
 
 import com.jogamp.opengl.util.gl2.GLUT;
+import com.jogamp.opengl.util.texture.Texture;
+import com.jogamp.opengl.util.texture.TextureData;
+import com.jogamp.opengl.util.texture.TextureIO;
 
 import framework.JOGLFrame;
 import framework.Pixmap;
 import framework.Scene;
 
-public class GameView extends Scene {
+public class GameView extends Scene implements GLEventListener {
 
     private static JOGLFrame myFrame;
-    private final String DEFAULT_MAP_FILE = "img/iceworld_0.bmp";
+    private final String DEFAULT_MAP_FILE = "src/img/iceworld_0.bmp";
     private final int MAP_ID = 1;
     private final float HEIGHT_RATIO = 0.25f;
     private final double SCREEN_WIDTH_CENTER = 350;
     private final double SCREEN_HEIGHT_CENTER = 350;
-    private final double SPEED = 0.1;
+    private final double MOVEMENT_INCRE = 0.1;
+    private final int MOUSE_CENTER_TOLERANCE = 50;
 
-    private final static float zPosition = -20;
     private final static double LOOK_AT_DIST = 100;
-    private static final int FLOOR_LEN = 50;
+    private static final int FLOOR_LEN = 48;
     private static final float ANGLE_INCRE = 0.25f;
     private static final float HEIGHT_INCRE = 0.25f;
     private static final int MAX_JUMP_HEIGHT = 10;
 
+    Texture skyboxTexture;
     private int myRenderMode;
     private int myStepSize;
     private ArrayList<List<Face>> myFaces;
@@ -56,16 +64,18 @@ public class GameView extends Scene {
     private boolean MOVE_LEFT = false;
     private boolean OBJECT_ASCEND = false;
     private boolean OBJECT_DESCEND = false;
+    private boolean GAME_STARTED = false;
 
-    private float xPos = 0, yPos = 1, zPos = zPosition;
+    private float xPos = 0, yPos = 1, zPos = -20;
     private float xLookAt = 0, yLookAt = 0, zLookAt = 100;
     private float xStep, zStep;
     private float viewAngle;
-    private boolean MOUSE_MOVED = false;
     private Point myMouseLocation;
     private double xDelta;
     private double yDelta;
-    private int MOTION_JUMP=-100;
+    private int MOTION_JUMP = -MAX_JUMP_HEIGHT;
+    private int texture;
+    private int skyboxList;
 
     public GameView(String[] args) {
 	super("Counter Strike v0.1");
@@ -96,22 +106,31 @@ public class GameView extends Scene {
 	zLookAt = (float) (zPos + (LOOK_AT_DIST * zStep));
 	isCompiled = false;
 	myMouseLocation = MouseInfo.getPointerInfo().getLocation();
-	
+
 	myRenderMode = GL2GL3.GL_QUADS;
+	
 	myMapRenderer = MapRenderer.getMapRenderer();
 	myMapRenderer.init(myHeightMap, myStepSize);
 	myMapRenderer.build();
 
-	// make all normals unit length
+	
+	//skyboxTexture = makeTexture(gl,"src/img/skybox_up.rgb"); // for the sky box
+	System.out.println(skyboxTexture==null);
+	//skyboxTexture.setTexParameteri(gl,gl.GL_TEXTURE_WRAP_S, gl.GL_REPEAT);
+	//skyboxTexture.setTexParameteri(gl,gl.GL_TEXTURE_WRAP_T, gl.GL_REPEAT);
+	
+	//gl.glCallList(skyboxList);
 	gl.glEnable(GLLightingFunc.GL_NORMALIZE);
 	gl.glEnable(GLLightingFunc.GL_COLOR_MATERIAL);
     }
 
     @Override
     public void display(GL2 gl, GLU glu, GLUT glut) {
+
 	if (!isCompiled) {
 	    gl.glDeleteLists(MAP_ID, 1);
 	    gl.glNewList(MAP_ID, GL2.GL_COMPILE);
+	    GAME_STARTED = true;
 	    drawMap(gl, glu, glut);
 	    gl.glEndList();
 	    isCompiled = true;
@@ -122,6 +141,14 @@ public class GameView extends Scene {
 
     }
 
+    
+    private void drawSkyBox(GL2 gl){
+	gl.glDisable(gl.GL_LIGHTING);
+	gl.glEnable(gl.GL_TEXTURE_2D);
+	skyboxTexture.bind(gl);
+	
+    }
+    
     private void drawMap(GL2 gl, GLU glu, GLUT glut) {
 	gl.glBegin(myRenderMode);
 	{
@@ -148,15 +175,21 @@ public class GameView extends Scene {
      */
     @Override
     public void setLighting(GL2 gl, GLU glu, GLUT glut) {
-	float[] light0pos = { 0, 150, 0, 1 };
-	float[] light0dir = { 0, -1, 0, 0 };
+	float[] light0pos = { 50005, 30000, 50000, 1 };
 	gl.glEnable(GLLightingFunc.GL_LIGHTING);
 	gl.glEnable(GLLightingFunc.GL_LIGHT0);
 	gl.glLightfv(GLLightingFunc.GL_LIGHT0, GLLightingFunc.GL_POSITION,
 		light0pos, 0);
-	gl.glLightfv(GLLightingFunc.GL_LIGHT0,
-		GLLightingFunc.GL_SPOT_DIRECTION, light0dir, 0);
-	gl.glLightf(GLLightingFunc.GL_LIGHT0, GLLightingFunc.GL_SPOT_CUTOFF, 20);
+	float[] noAmbient = { 0.1f, 0.1f, 0.1f, 1f }; // low ambient light
+	float[] spec = { 1f, 0.6f, 0f, 1f }; // low ambient light
+	float[] diffuse = { 1f, 1f, 1f, 1f };
+	// properties of the light
+	gl.glLightfv(GLLightingFunc.GL_LIGHT0, GLLightingFunc.GL_AMBIENT,
+		noAmbient, 0);
+	gl.glLightfv(GLLightingFunc.GL_LIGHT0, GLLightingFunc.GL_SPECULAR,
+		spec, 0);
+	gl.glLightfv(GLLightingFunc.GL_LIGHT0, GLLightingFunc.GL_DIFFUSE,
+		diffuse, 0);
     }
 
     /**
@@ -193,7 +226,9 @@ public class GameView extends Scene {
 	    OBJECT_DESCEND = true;
 	    break;
 	case KeyEvent.VK_SPACE:
-	    MOTION_JUMP=MAX_JUMP_HEIGHT;
+	    if (MOTION_JUMP == -MAX_JUMP_HEIGHT){
+		MOTION_JUMP = MAX_JUMP_HEIGHT;
+	    };
 	}
     }
 
@@ -211,16 +246,16 @@ public class GameView extends Scene {
 	    RESET_VIEW = false;
 	    INIT_DONE = false;
 	}
-	if (MOTION_JUMP>0){
+	if (MOTION_JUMP > 0) {
 	    gl.glTranslatef(0, -HEIGHT_INCRE, 0);
-	    MOTION_JUMP-=1;
+	    MOTION_JUMP -= 1;
 	}
-	if ((MOTION_JUMP<=0)&&(MOTION_JUMP!=-MAX_JUMP_HEIGHT)){
+	if ((MOTION_JUMP <= 0) && (MOTION_JUMP != -MAX_JUMP_HEIGHT)) {
 	    gl.glTranslatef(0, HEIGHT_INCRE, 0);
-	    MOTION_JUMP-=1;
+	    MOTION_JUMP -= 1;
 	}
-	if (MOTION_JUMP<-MAX_JUMP_HEIGHT){
-	    MOTION_JUMP=-MAX_JUMP_HEIGHT;
+	if (MOTION_JUMP < -MAX_JUMP_HEIGHT) {
+	    MOTION_JUMP = -MAX_JUMP_HEIGHT;
 	}
 	if (OBJECT_ASCEND) {
 	    gl.glTranslatef(0, -0.1f, 0);
@@ -231,41 +266,41 @@ public class GameView extends Scene {
 	    OBJECT_DESCEND = false;
 	}
 	if (MOVE_RIGHT) {
-	    xPos -= zStep * SPEED;
-	    zPos += xStep * SPEED;
+	    xPos -= zStep * MOVEMENT_INCRE;
+	    zPos += xStep * MOVEMENT_INCRE;
 	    MOVE_RIGHT = false;
 	}
 	if (MOVE_LEFT) {
-	    xPos += zStep * SPEED;
-	    zPos -= xStep * SPEED;
+	    xPos += zStep * MOVEMENT_INCRE;
+	    zPos -= xStep * MOVEMENT_INCRE;
 	    MOVE_LEFT = false;
 	}
 	if (MOVE_FORWARD) {
-	    xPos += xStep * SPEED;
-	    zPos += zStep * SPEED;
+	    xPos += xStep * MOVEMENT_INCRE;
+	    zPos += zStep * MOVEMENT_INCRE;
 	    MOVE_FORWARD = false;
 	}
 	if (MOVE_BACKWARD) {
-	    xPos -= xStep * SPEED;
-	    zPos -= zStep * SPEED;
+	    xPos -= xStep * MOVEMENT_INCRE;
+	    zPos -= zStep * MOVEMENT_INCRE;
 	    MOVE_BACKWARD = false;
 	}
 	// Rotate Left
-	if (xDelta > 50) {
+	if (xDelta > MOUSE_CENTER_TOLERANCE) {
 	    viewAngle += ANGLE_INCRE;
 	    xStep = (float) Math.cos(Math.toRadians(viewAngle));
 	    zStep = (float) Math.sin(Math.toRadians(viewAngle));
 	}
 	// Rotate Right
-	if (xDelta < -50) {
+	if (xDelta < -MOUSE_CENTER_TOLERANCE) {
 	    viewAngle -= ANGLE_INCRE;
 	    xStep = (float) Math.cos(Math.toRadians(viewAngle));
 	    zStep = (float) Math.sin(Math.toRadians(viewAngle));
 	}
-	if (yDelta > 50) {
+	if (yDelta > MOUSE_CENTER_TOLERANCE) {
 	    gl.glRotatef(ANGLE_INCRE, 1, 0, 0);
 	}
-	if (yDelta < -50) {
+	if (yDelta < -MOUSE_CENTER_TOLERANCE) {
 	    gl.glRotatef(-ANGLE_INCRE, 1, 0, 0);
 	}
 
@@ -320,16 +355,77 @@ public class GameView extends Scene {
      * Called when the mouse is pressed within the canvas and it hits something.
      */
 
+   
     @Override
     public void selectObject(GL2 gl, GLU glu, GLUT glut, int numSelected,
 	    int[] selectInfo) {
 	// by default, do nothing
     }
-
+    
+    private Texture makeTexture(GL2 gl, String name) {
+   	try {
+   	    InputStream stream = getClass().getResourceAsStream(name);
+   	    Texture result = TextureIO.newTexture(stream, false, "rgb");
+//   	     result.setTexParameteri(gl,gl.GL_TEXTURE_MAG_FILTER, gl.GL_NEAREST);
+//   	     result.setTexParameteri(gl,gl.GL_TEXTURE_MIN_FILTER, gl.GL_NEAREST);
+   	    return result;
+   	} catch (IOException e) {
+   	    System.err.println("Unable to load texture image: " + name);
+   	    //System.exit(1);
+   	    // should never happen
+   	    return null;
+   	}
+       }
+    
     public static void main(String[] args) {
 
 	myFrame = new JOGLFrame(new GameView(args));
 	myFrame.setResizable(false);
+    }
+
+    @Override
+    public void init(GLAutoDrawable drawable) {
+	GL2 gl = (GL2) drawable.getGL();
+	gl.glShadeModel(GLLightingFunc.GL_SMOOTH);
+	try {
+	    GLProfile myProfile = drawable.getGLProfile();
+	    InputStream stream = getClass().getResourceAsStream(
+		    "src/img/skybox_up.rgb");
+	    TextureData data = TextureIO.newTextureData(myProfile, stream,
+		    false, "rgb");
+	    skyboxTexture = TextureIO.newTexture(data);
+	} catch (IOException exc) {
+	    exc.printStackTrace();
+	    System.exit(1);
+	}
+	gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_S, GL2.GL_CLAMP);
+	gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_T, GL2.GL_CLAMP);
+	// Enable VSync
+	gl.setSwapInterval(1);
+
+	// Setup the drawing area and shading mode
+	gl.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+
+	
+    }
+
+    @Override
+    public void dispose(GLAutoDrawable drawable) {
+	// TODO Auto-generated method stub
+	
+    }
+
+    @Override
+    public void display(GLAutoDrawable drawable) {
+	// TODO Auto-generated method stub
+	
+    }
+
+    @Override
+    public void reshape(GLAutoDrawable drawable, int x, int y, int width,
+	    int height) {
+	// TODO Auto-generated method stub
+	
     }
 
 }
