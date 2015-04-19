@@ -4,15 +4,21 @@ import java.awt.MouseInfo;
 import java.awt.Point;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.imageio.ImageIO;
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 import javax.media.opengl.GL2GL3;
 import javax.media.opengl.GLAutoDrawable;
+import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GLEventListener;
 import javax.media.opengl.GLProfile;
 import javax.media.opengl.fixedfunc.GLLightingFunc;
@@ -21,6 +27,7 @@ import javax.swing.JFrame;
 
 import model.Face;
 
+import com.jogamp.opengl.swt.GLCanvas;
 import com.jogamp.opengl.util.gl2.GLUT;
 import com.jogamp.opengl.util.texture.Texture;
 import com.jogamp.opengl.util.texture.TextureData;
@@ -30,7 +37,7 @@ import framework.JOGLFrame;
 import framework.Pixmap;
 import framework.Scene;
 
-public class GameView extends Scene implements GLEventListener {
+public class GameView extends Scene{
 
     private static JOGLFrame myFrame;
     private final String DEFAULT_MAP_FILE = "src/img/iceworld_0.bmp";
@@ -50,7 +57,6 @@ public class GameView extends Scene implements GLEventListener {
     Texture skyboxTexture;
     private int myRenderMode;
     private int myStepSize;
-    private ArrayList<List<Face>> myFaces;
     private Pixmap myHeightMap;
     private MapRenderer myMapRenderer;
 
@@ -74,8 +80,7 @@ public class GameView extends Scene implements GLEventListener {
     private double xDelta;
     private double yDelta;
     private int MOTION_JUMP = -MAX_JUMP_HEIGHT;
-    private int texture;
-    private int skyboxList;
+    private int[] _skybox=new int[7];
 
     public GameView(String[] args) {
 	super("Counter Strike v0.1");
@@ -90,9 +95,9 @@ public class GameView extends Scene implements GLEventListener {
 
     }
 
+    @Override
     public void init(GL2 gl, GLU glu, GLUT glut) {
 
-	myFaces = new ArrayList<List<Face>>();
 	myRenderMode = GL2GL3.GL_QUADS;
 	myScale = 0.05f;
 	myStepSize = 1;
@@ -112,10 +117,13 @@ public class GameView extends Scene implements GLEventListener {
 	myMapRenderer = MapRenderer.getMapRenderer();
 	myMapRenderer.init(myHeightMap, myStepSize);
 	myMapRenderer.build();
-
 	
-	//skyboxTexture = makeTexture(gl,"src/img/skybox_up.rgb"); // for the sky box
-	System.out.println(skyboxTexture==null);
+	
+	
+	gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_WRAP_S, gl.GL_CLAMP);
+	gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_WRAP_T, gl.GL_CLAMP);
+	skyboxTexture = makeTexture(gl,"src/img/skybox_up.rgb"); // for the sky box
+	//System.out.println(skyboxTexture==null);
 	//skyboxTexture.setTexParameteri(gl,gl.GL_TEXTURE_WRAP_S, gl.GL_REPEAT);
 	//skyboxTexture.setTexParameteri(gl,gl.GL_TEXTURE_WRAP_T, gl.GL_REPEAT);
 	
@@ -127,26 +135,101 @@ public class GameView extends Scene implements GLEventListener {
     @Override
     public void display(GL2 gl, GLU glu, GLUT glut) {
 
+	createSkybox(gl,glu,glut);
 	if (!isCompiled) {
 	    gl.glDeleteLists(MAP_ID, 1);
 	    gl.glNewList(MAP_ID, GL2.GL_COMPILE);
 	    GAME_STARTED = true;
 	    drawMap(gl, glu, glut);
-	    gl.glEndList();
 	    isCompiled = true;
 	}
-
+	
 	gl.glScalef(myScale, myScale * HEIGHT_RATIO, myScale);
 	gl.glCallList(MAP_ID);
 
     }
 
     
-    private void drawSkyBox(GL2 gl){
-	gl.glDisable(gl.GL_LIGHTING);
-	gl.glEnable(gl.GL_TEXTURE_2D);
-	skyboxTexture.bind(gl);
-	
+    private void createSkybox(GL2 gl,GLU glu,GLUT glut) {
+	 // Store the current matrix
+	    gl.glPushMatrix();
+	 
+	    // Reset and transform the matrix.
+	    gl.glLoadIdentity();
+	    glu.gluLookAt(
+	        0,0,0,
+	        xLookAt,yLookAt,zLookAt,
+	        0,1,0);
+	 
+	    // Enable/Disable features
+	    gl.glPushAttrib(gl.GL_ENABLE_BIT);
+	    gl.glEnable(gl.GL_TEXTURE_2D);
+	    gl.glDisable(gl.GL_DEPTH_TEST);
+	    gl.glDisable(gl.GL_LIGHTING);
+	    gl.glDisable(gl.GL_BLEND);
+	 
+	    // Just in case we set all vertices to white.
+	    gl.glColor4f(1,1,1,1);
+	 
+	    // Render the front quad
+	    gl.glBindTexture(gl.GL_TEXTURE_2D, _skybox[0]);
+	    gl.glBegin(gl.GL_QUADS);
+	        gl.glTexCoord2f(0, 0); gl.glVertex3f(  0.5f, -0.5f, -0.5f );
+	        gl.glTexCoord2f(1, 0); gl.glVertex3f( -0.5f, -0.5f, -0.5f );
+	        gl.glTexCoord2f(1, 1); gl.glVertex3f( -0.5f,  0.5f, -0.5f );
+	        gl.glTexCoord2f(0, 1); gl.glVertex3f(  0.5f,  0.5f, -0.5f );
+	    gl.glEnd();
+	 
+	    // Render the left quad
+	    gl.glBindTexture(gl.GL_TEXTURE_2D, _skybox[1]);
+	    gl.glBegin(gl.GL_QUADS);
+	        gl.glTexCoord2f(0, 0); gl.glVertex3f(  0.5f, -0.5f,  0.5f );
+	        gl.glTexCoord2f(1, 0); gl.glVertex3f(  0.5f, -0.5f, -0.5f );
+	        gl.glTexCoord2f(1, 1); gl.glVertex3f(  0.5f,  0.5f, -0.5f );
+	        gl.glTexCoord2f(0, 1); gl.glVertex3f(  0.5f,  0.5f,  0.5f );
+	    gl.glEnd();
+	 
+	    // Render the back quad
+	    gl.glBindTexture(gl.GL_TEXTURE_2D, _skybox[2]);
+	    gl.glBegin(gl.GL_QUADS);
+	        gl.glTexCoord2f(0, 0); gl.glVertex3f( -0.5f, -0.5f,  0.5f );
+	        gl.glTexCoord2f(1, 0); gl.glVertex3f(  0.5f, -0.5f,  0.5f );
+	        gl.glTexCoord2f(1, 1); gl.glVertex3f(  0.5f,  0.5f,  0.5f );
+	        gl.glTexCoord2f(0, 1); gl.glVertex3f( -0.5f,  0.5f,  0.5f );
+	 
+	    gl.glEnd();
+	 
+	    // Render the right quad
+	    gl.glBindTexture(gl.GL_TEXTURE_2D, _skybox[3]);
+	    gl.glBegin(gl.GL_QUADS);
+	        gl.glTexCoord2f(0, 0); gl.glVertex3f( -0.5f, -0.5f, -0.5f );
+	        gl.glTexCoord2f(1, 0); gl.glVertex3f( -0.5f, -0.5f,  0.5f );
+	        gl.glTexCoord2f(1, 1); gl.glVertex3f( -0.5f,  0.5f,  0.5f );
+	        gl.glTexCoord2f(0, 1); gl.glVertex3f( -0.5f,  0.5f, -0.5f );
+	    gl.glEnd();
+	 
+	    // Render the top quad
+	    gl.glBindTexture(gl.GL_TEXTURE_2D, _skybox[4]);
+	    gl.glBegin(gl.GL_QUADS);
+	        gl.glTexCoord2f(0, 1); gl.glVertex3f( -0.5f,  0.5f, -0.5f );
+	        gl.glTexCoord2f(0, 0); gl.glVertex3f( -0.5f,  0.5f,  0.5f );
+	        gl.glTexCoord2f(1, 0); gl.glVertex3f(  0.5f,  0.5f,  0.5f );
+	        gl.glTexCoord2f(1, 1); gl.glVertex3f(  0.5f,  0.5f, -0.5f );
+	    gl.glEnd();
+	 
+	    // Render the bottom quad
+	    gl.glBindTexture(gl.GL_TEXTURE_2D, _skybox[5]);
+	    gl.glBegin(gl.GL_QUADS);
+	        gl.glTexCoord2f(0, 0); gl.glVertex3f( -0.5f, -0.5f, -0.5f );
+	        gl.glTexCoord2f(0, 1); gl.glVertex3f( -0.5f, -0.5f,  0.5f );
+	        gl.glTexCoord2f(1, 1); gl.glVertex3f(  0.5f, -0.5f,  0.5f );
+	        gl.glTexCoord2f(1, 0); gl.glVertex3f(  0.5f, -0.5f, -0.5f );
+	    gl.glEnd();
+	 
+	    // Restore enable bits and matrix
+	    gl.glPopAttrib();
+	    gl.glPopMatrix();
+
     }
     
     private void drawMap(GL2 gl, GLU glu, GLUT glut) {
@@ -364,14 +447,14 @@ public class GameView extends Scene implements GLEventListener {
     
     private Texture makeTexture(GL2 gl, String name) {
    	try {
-   	    InputStream stream = getClass().getResourceAsStream(name);
+   	    InputStream stream = new FileInputStream(name);
    	    Texture result = TextureIO.newTexture(stream, false, "rgb");
 //   	     result.setTexParameteri(gl,gl.GL_TEXTURE_MAG_FILTER, gl.GL_NEAREST);
 //   	     result.setTexParameteri(gl,gl.GL_TEXTURE_MIN_FILTER, gl.GL_NEAREST);
    	    return result;
    	} catch (IOException e) {
    	    System.err.println("Unable to load texture image: " + name);
-   	    //System.exit(1);
+   	    e.printStackTrace();
    	    // should never happen
    	    return null;
    	}
@@ -381,52 +464,6 @@ public class GameView extends Scene implements GLEventListener {
 
 	myFrame = new JOGLFrame(new GameView(args));
 	myFrame.setResizable(false);
-    }
-
-    @Override
-    public void init(GLAutoDrawable drawable) {
-	GL2 gl = (GL2) drawable.getGL();
-	gl.glShadeModel(GLLightingFunc.GL_SMOOTH);
-	try {
-	    GLProfile myProfile = drawable.getGLProfile();
-	    InputStream stream = getClass().getResourceAsStream(
-		    "src/img/skybox_up.rgb");
-	    TextureData data = TextureIO.newTextureData(myProfile, stream,
-		    false, "rgb");
-	    System.out.println(stream==null);
-	    skyboxTexture = TextureIO.newTexture(data);
-	} catch (IOException exc) {
-	    exc.printStackTrace();
-	    System.exit(1);
-	}
-	gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_S, GL2.GL_CLAMP);
-	gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_T, GL2.GL_CLAMP);
-	// Enable VSync
-	gl.setSwapInterval(1);
-
-	// Setup the drawing area and shading mode
-	gl.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-
-	
-    }
-
-    @Override
-    public void dispose(GLAutoDrawable drawable) {
-	// TODO Auto-generated method stub
-	
-    }
-
-    @Override
-    public void display(GLAutoDrawable drawable) {
-	// TODO Auto-generated method stub
-	
-    }
-
-    @Override
-    public void reshape(GLAutoDrawable drawable, int x, int y, int width,
-	    int height) {
-	// TODO Auto-generated method stub
-	
     }
 
 }
