@@ -41,6 +41,11 @@ public class GameView extends Scene{
 
     private static JOGLFrame myFrame;
     private final String DEFAULT_MAP_FILE = "src/img/iceworld_0.bmp";
+    String[] textureNames = new String[]{
+	    "src/img/skybox_fr.rgb","src/img/skybox_lf.rgb","src/img/skybox_bk.rgb",
+	    "src/img/skybox_rt.rgb","src/img/skybox_up.rgb","src/img/skybox_dn.rgb",
+        };
+    Texture[] skyboxTextures = new Texture[7];
     private final int MAP_ID = 1;
     private final float HEIGHT_RATIO = 0.25f;
     private final double SCREEN_WIDTH_CENTER = 350;
@@ -54,7 +59,6 @@ public class GameView extends Scene{
     private static final float HEIGHT_INCRE = 0.25f;
     private static final int MAX_JUMP_HEIGHT = 10;
 
-    Texture skyboxTexture;
     private int myRenderMode;
     private int myStepSize;
     private Pixmap myHeightMap;
@@ -80,7 +84,7 @@ public class GameView extends Scene{
     private double xDelta;
     private double yDelta;
     private int MOTION_JUMP = -MAX_JUMP_HEIGHT;
-    private int[] _skybox=new int[7];
+    private int[] _skybox={1,2,3,4,5,6};
 
     public GameView(String[] args) {
 	super("Counter Strike v0.1");
@@ -119,23 +123,23 @@ public class GameView extends Scene{
 	myMapRenderer.build();
 	
 	
+	gl.glGenTextures(6, _skybox, 0);
+	for (int i=0;i<6;i++){
+	    skyboxTextures[i] = makeTexture(gl,textureNames[i]); // for the sky box
+	    
+	}
 	
-	gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_WRAP_S, gl.GL_CLAMP);
-	gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_WRAP_T, gl.GL_CLAMP);
-	skyboxTexture = makeTexture(gl,"src/img/skybox_up.rgb"); // for the sky box
-	//System.out.println(skyboxTexture==null);
-	//skyboxTexture.setTexParameteri(gl,gl.GL_TEXTURE_WRAP_S, gl.GL_REPEAT);
-	//skyboxTexture.setTexParameteri(gl,gl.GL_TEXTURE_WRAP_T, gl.GL_REPEAT);
+	gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_S, GL2.GL_CLAMP);
+	gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_T, GL2.GL_CLAMP);
 	
-	//gl.glCallList(skyboxList);
 	gl.glEnable(GLLightingFunc.GL_NORMALIZE);
 	gl.glEnable(GLLightingFunc.GL_COLOR_MATERIAL);
+	gl.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     }
 
     @Override
     public void display(GL2 gl, GLU glu, GLUT glut) {
 
-	createSkybox(gl,glu,glut);
 	if (!isCompiled) {
 	    gl.glDeleteLists(MAP_ID, 1);
 	    gl.glNewList(MAP_ID, GL2.GL_COMPILE);
@@ -143,14 +147,15 @@ public class GameView extends Scene{
 	    drawMap(gl, glu, glut);
 	    isCompiled = true;
 	}
-	
+	createSkybox(gl,glu,glut);
 	gl.glScalef(myScale, myScale * HEIGHT_RATIO, myScale);
 	gl.glCallList(MAP_ID);
-
+	
     }
 
     
     private void createSkybox(GL2 gl,GLU glu,GLUT glut) {
+	    gl.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
 	 // Store the current matrix
 	    gl.glPushMatrix();
 	 
@@ -165,13 +170,14 @@ public class GameView extends Scene{
 	    gl.glPushAttrib(gl.GL_ENABLE_BIT);
 	    gl.glEnable(gl.GL_TEXTURE_2D);
 	    gl.glDisable(gl.GL_DEPTH_TEST);
-	    gl.glDisable(gl.GL_LIGHTING);
+	    gl.glDisable(GLLightingFunc.GL_LIGHTING);
 	    gl.glDisable(gl.GL_BLEND);
-	 
 	    // Just in case we set all vertices to white.
-	    gl.glColor4f(1,1,1,1);
+	    gl.glColor4f(1,0,0,1);
 	 
 	    // Render the front quad
+	    skyboxTextures[0].enable(gl);
+	    skyboxTextures[0].bind(gl);
 	    gl.glBindTexture(gl.GL_TEXTURE_2D, _skybox[0]);
 	    gl.glBegin(gl.GL_QUADS);
 	        gl.glTexCoord2f(0, 0); gl.glVertex3f(  0.5f, -0.5f, -0.5f );
