@@ -393,6 +393,7 @@ public class GameView extends Scene implements GLEventListener {
 		    "src/img/skybox_up.rgb");
 	    TextureData data = TextureIO.newTextureData(myProfile, stream,
 		    false, "rgb");
+	    System.out.println(stream==null);
 	    skyboxTexture = TextureIO.newTexture(data);
 	} catch (IOException exc) {
 	    exc.printStackTrace();
