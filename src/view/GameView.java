@@ -123,18 +123,18 @@ public class GameView extends Scene{
 	myMapRenderer.build();
 	
 	
-	gl.glGenTextures(6, _skybox, 0);
-	for (int i=0;i<6;i++){
-	    skyboxTextures[i] = makeTexture(gl,textureNames[i]); // for the sky box
+//	gl.glGenTextures(6, _skybox, 0);
+//	for (int i=0;i<6;i++){
+//	    skyboxTextures[i] = makeTexture(gl,textureNames[i]); // for the sky box
 	    
-	}
+//	}
 	
-	gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_S, GL2.GL_CLAMP);
-	gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_T, GL2.GL_CLAMP);
+//	gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_S, GL2.GL_CLAMP);
+//	gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_T, GL2.GL_CLAMP);
 	
 	gl.glEnable(GLLightingFunc.GL_NORMALIZE);
 	gl.glEnable(GLLightingFunc.GL_COLOR_MATERIAL);
-	gl.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+
     }
 
     @Override
@@ -145,9 +145,10 @@ public class GameView extends Scene{
 	    gl.glNewList(MAP_ID, GL2.GL_COMPILE);
 	    GAME_STARTED = true;
 	    drawMap(gl, glu, glut);
+	    gl.glEndList();
 	    isCompiled = true;
 	}
-	createSkybox(gl,glu,glut);
+//	createSkybox(gl,glu,glut);
 	gl.glScalef(myScale, myScale * HEIGHT_RATIO, myScale);
 	gl.glCallList(MAP_ID);
 	
@@ -354,6 +355,9 @@ public class GameView extends Scene{
 	    gl.glTranslatef(0, 0.1f, 0);
 	    OBJECT_DESCEND = false;
 	}
+	
+	float xPos_bak=xPos,zPos_bak=zPos;
+	
 	if (MOVE_RIGHT) {
 	    xPos -= zStep * MOVEMENT_INCRE;
 	    zPos += xStep * MOVEMENT_INCRE;
@@ -374,6 +378,12 @@ public class GameView extends Scene{
 	    zPos -= zStep * MOVEMENT_INCRE;
 	    MOVE_BACKWARD = false;
 	}
+	
+	if (collisionCheck(xPos,zPos)){
+	    xPos=xPos_bak;
+	    zPos=zPos_bak;
+	}
+	
 	// Rotate Left
 	if (xDelta > MOUSE_CENTER_TOLERANCE) {
 	    viewAngle += ANGLE_INCRE;
@@ -403,12 +413,17 @@ public class GameView extends Scene{
 	else if (zPos > FLOOR_LEN / 2)
 	    zPos = FLOOR_LEN / 2;
 
-	// System.out.print(xPos);
-	// System.out.print(" ");
-	// System.out.println(zPos);
+	System.out.print(xPos);
+	System.out.print(" ");
+	System.out.println(zPos);
 
 	xLookAt = (float) (xPos + (xStep * LOOK_AT_DIST));
 	zLookAt = (float) (zPos + (zStep * LOOK_AT_DIST));
+    }
+
+    private boolean collisionCheck(float xPos2, float zPos2) {
+	// TODO Auto-generated method stub
+	return false;
     }
 
     /**
