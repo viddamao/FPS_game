@@ -55,7 +55,7 @@ public class GameView extends Scene{
 
     private final static double LOOK_AT_DIST = 100;
     private static final int FLOOR_LEN = 48;
-    private static final float ANGLE_INCRE = 0.25f;
+    private static final float ANGLE_INCRE = 0.5f;
     private static final float HEIGHT_INCRE = 0.25f;
     private static final int MAX_JUMP_HEIGHT = 10;
 
@@ -174,12 +174,11 @@ public class GameView extends Scene{
 	    gl.glDisable(GLLightingFunc.GL_LIGHTING);
 	    gl.glDisable(gl.GL_BLEND);
 	    // Just in case we set all vertices to white.
-	    gl.glColor4f(0,0,1,1);
+	    gl.glColor4f(1,1,1,1);
 	 
 	    // Render the front quad
 	    skyboxTextures[0].enable(gl);
 	    skyboxTextures[0].bind(gl);
-	    gl.glBindTexture(gl.GL_TEXTURE_2D, _skybox[0]);
 	    gl.glBegin(gl.GL_QUADS);
 	        gl.glTexCoord2f(0, 0); gl.glVertex3f(  0.5f, -0.5f, -0.5f );
 	        gl.glTexCoord2f(1, 0); gl.glVertex3f( -0.5f, -0.5f, -0.5f );
@@ -188,7 +187,8 @@ public class GameView extends Scene{
 	    gl.glEnd();
 	 
 	    // Render the left quad
-	    gl.glBindTexture(gl.GL_TEXTURE_2D, _skybox[1]);
+	    skyboxTextures[1].enable(gl);
+	    skyboxTextures[1].bind(gl);
 	    gl.glBegin(gl.GL_QUADS);
 	        gl.glTexCoord2f(0, 0); gl.glVertex3f(  0.5f, -0.5f,  0.5f );
 	        gl.glTexCoord2f(1, 0); gl.glVertex3f(  0.5f, -0.5f, -0.5f );
@@ -197,7 +197,8 @@ public class GameView extends Scene{
 	    gl.glEnd();
 	 
 	    // Render the back quad
-	    gl.glBindTexture(gl.GL_TEXTURE_2D, _skybox[2]);
+	    skyboxTextures[2].enable(gl);
+	    skyboxTextures[2].bind(gl);
 	    gl.glBegin(gl.GL_QUADS);
 	        gl.glTexCoord2f(0, 0); gl.glVertex3f( -0.5f, -0.5f,  0.5f );
 	        gl.glTexCoord2f(1, 0); gl.glVertex3f(  0.5f, -0.5f,  0.5f );
@@ -207,7 +208,8 @@ public class GameView extends Scene{
 	    gl.glEnd();
 	 
 	    // Render the right quad
-	    gl.glBindTexture(gl.GL_TEXTURE_2D, _skybox[3]);
+	    skyboxTextures[3].enable(gl);
+	    skyboxTextures[3].bind(gl);
 	    gl.glBegin(gl.GL_QUADS);
 	        gl.glTexCoord2f(0, 0); gl.glVertex3f( -0.5f, -0.5f, -0.5f );
 	        gl.glTexCoord2f(1, 0); gl.glVertex3f( -0.5f, -0.5f,  0.5f );
@@ -215,8 +217,10 @@ public class GameView extends Scene{
 	        gl.glTexCoord2f(0, 1); gl.glVertex3f( -0.5f,  0.5f, -0.5f );
 	    gl.glEnd();
 	 
+	    
 	    // Render the top quad
-	    gl.glBindTexture(gl.GL_TEXTURE_2D, _skybox[4]);
+	    skyboxTextures[4].enable(gl);
+	    skyboxTextures[4].bind(gl);
 	    gl.glBegin(gl.GL_QUADS);
 	        gl.glTexCoord2f(0, 1); gl.glVertex3f( -0.5f,  0.5f, -0.5f );
 	        gl.glTexCoord2f(0, 0); gl.glVertex3f( -0.5f,  0.5f,  0.5f );
@@ -225,7 +229,8 @@ public class GameView extends Scene{
 	    gl.glEnd();
 	 
 	    // Render the bottom quad
-	    gl.glBindTexture(gl.GL_TEXTURE_2D, _skybox[5]);
+	    skyboxTextures[5].enable(gl);
+	    skyboxTextures[5].bind(gl);
 	    gl.glBegin(gl.GL_QUADS);
 	        gl.glTexCoord2f(0, 0); gl.glVertex3f( -0.5f, -0.5f, -0.5f );
 	        gl.glTexCoord2f(0, 1); gl.glVertex3f( -0.5f, -0.5f,  0.5f );
@@ -396,6 +401,7 @@ public class GameView extends Scene{
 	    xStep = (float) Math.cos(Math.toRadians(viewAngle));
 	    zStep = (float) Math.sin(Math.toRadians(viewAngle));
 	}
+	
 	if (yDelta > MOUSE_CENTER_TOLERANCE) {
 	    gl.glRotatef(ANGLE_INCRE, 1, 0, 0);
 	}
@@ -413,6 +419,7 @@ public class GameView extends Scene{
 	else if (zPos > FLOOR_LEN / 2)
 	    zPos = FLOOR_LEN / 2;
 
+	
 //	System.out.print(xPos);
 //	System.out.print(" ");
 //	System.out.println(zPos);
