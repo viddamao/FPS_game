@@ -145,8 +145,8 @@ public class GameView extends Scene {
 	gl.glEnable(GLLightingFunc.GL_COLOR_MATERIAL);
 
 	try {
-	    myModel = new OBJModel(myModelFile);
-	    System.out.println(myModel);
+//	    myModel = new OBJModel(myModelFile);
+//	    System.out.println(myModel);
 	} catch (OBJException e) {
 	    System.out.println("Cannot load " + myModelFile);
 	    e.printStackTrace();
@@ -172,10 +172,10 @@ public class GameView extends Scene {
 	
 	//Gun model
 	gl.glPushMatrix();
-	gl.glTranslatef(xPos+10f, yPos+10f, zPos);
+	gl.glTranslatef(-xPos+10f, yPos+10f, zPos);
 	gl.glScalef(50,50,50);
 	gl.glPolygonMode(GL2.GL_FRONT_AND_BACK, myRenderMode);
-        myModel.render(gl);
+//        myModel.render(gl);
         gl.glPolygonMode(GL2.GL_FRONT_AND_BACK, GL2.GL_FILL);	
 	gl.glPopMatrix();
     }
@@ -473,16 +473,29 @@ public class GameView extends Scene {
 	else if (zPos > FLOOR_LEN / 2)
 	    zPos = FLOOR_LEN / 2;
 
-	// System.out.print(xPos);
-	// System.out.print(" ");
-	// System.out.println(zPos);
+	 System.out.print(xPos);
+	 System.out.print(" ");
+	 System.out.println(zPos);
 
 	xLookAt = (float) (xPos + (xStep * LOOK_AT_DIST));
 	zLookAt = (float) (zPos + (zStep * LOOK_AT_DIST));
     }
 
-    private boolean collisionCheck(float xPos2, float zPos2) {
-	// TODO Auto-generated method stub
+    private boolean collisionCheck(float x, float z) {
+	float[][] collisionModel={{-13.5f,14f,-2.7f,2f},//Zhuzi SW
+		{-13.5f,18f,-11.5f,14f},//Qiang SW
+		{-0.5f,24f,1.1f,19.7f},//Qiang W
+		{2.8f,14f,15.8f,2f},//Zhuzi NW
+		{13.7f,18f,15.8f,14f},//Qiang NW
+		
+		{-13.5f,-2.7f,-2.7f,-13.5f},//Qiang SE
+		{2.8f,-2.7f,15.8f,-13.5f}//Qiang NE
+	};
+	for (float[] i:collisionModel){
+	    if ((i[0]<=z)&&(i[1]>=x)&&(i[2]>=z)&&(i[3]<=x)){
+		return true;    
+	    }
+	}
 	return false;
     }
 
