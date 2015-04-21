@@ -49,10 +49,10 @@ public class GameView extends Scene {
 
     private static JOGLFrame myFrame;
     private final String DEFAULT_MAP_FILE = "src/img/iceworld_0.bmp";
-    String[] textureNames = new String[] { "src/img/skybox_fr.rgb",
-	    "src/img/skybox_lf.rgb", "src/img/skybox_bk.rgb",
-	    "src/img/skybox_rt.rgb", "src/img/skybox_up.rgb",
-	    "src/img/skybox_dn.rgb", };
+    String[] textureNames = new String[] { "src/img/skybox/skybox_fr.rgb",
+	    "src/img/skybox/skybox_lf.rgb", "src/img/skybox/skybox_bk.rgb",
+	    "src/img/skybox/skybox_rt.rgb", "src/img/skybox/skybox_up.rgb",
+	    "src/img/skybox/skybox_dn.rgb", };
     Texture[] skyboxTextures = new Texture[7];
     private final int MAP_ID = 1;
     private final float HEIGHT_RATIO = 0.25f;
@@ -98,6 +98,8 @@ public class GameView extends Scene {
     private int[] _skybox = { 1, 2, 3, 4, 5, 6 };
     private OBJModel myModel;
     private String myModelFile = "src/img/tommy-gun.obj";
+    private String mySpriteModelFile = "src/img/soldier.obj";
+    
 
     public GameView(String[] args) {
 	super("Counter Strike v0.10");
@@ -153,10 +155,10 @@ public class GameView extends Scene {
 	gl.glEnable(GLLightingFunc.GL_COLOR_MATERIAL);
 
 	try {
-	    myModel = new OBJModel(myModelFile);
+	    myModel = new OBJModel(mySpriteModelFile);
 //	    System.out.println(myModel);
 	} catch (OBJException e) {
-	    System.out.println("Cannot load " + myModelFile);
+	    System.out.println("Cannot load " + mySpriteModelFile);
 	    e.printStackTrace();
 	    System.exit(0);
 	}
@@ -181,8 +183,8 @@ public class GameView extends Scene {
 	
 	//Gun model
 	gl.glPushMatrix();
-	gl.glTranslatef(-xPos+10f, yPos+10f, zPos);
-	gl.glScalef(50,50,50);
+	gl.glTranslatef(-xPos+10f, yPos+20f, zPos);
+	gl.glScalef(30,200,30);
 	gl.glPolygonMode(GL2.GL_FRONT_AND_BACK, myRenderMode);
         myModel.render(gl);
         gl.glPolygonMode(GL2.GL_FRONT_AND_BACK, GL2.GL_FILL);	
