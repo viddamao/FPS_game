@@ -105,8 +105,8 @@ public class GameView extends Scene{
 	myRenderMode = GL2GL3.GL_QUADS;
 	myScale = 0.05f;
 	myStepSize = 1;
-
 	viewAngle = 90;
+	
 	xStep = (float) Math.cos(Math.toRadians(viewAngle)); // step distances
 	zStep = (float) Math.sin(Math.toRadians(viewAngle));
 

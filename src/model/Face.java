@@ -73,7 +73,7 @@ public class Face implements Comparable {
 	for (Vertex v : myVertices) {
 	    float[] normal = v.getVertexNormal(gl, glu, glut);
 	    float z = v.getY();
-	    gl.glColor3f((z / 255) * .84f, (z / 255) * .86f, (z / 255) * .86f);
+	    gl.glColor3f((z / 255) * .84f+0.4f, (z / 255) * .86f+0.4f, (z / 255) * .86f+0.4f);
 	    // gl.glColor3f(1.0f, 1.0f, 1.0f);
 	    gl.glNormal3f(normal[0], normal[1], normal[2]);
 	    gl.glVertex3f(v.getX(), v.getY(), v.getZ());
