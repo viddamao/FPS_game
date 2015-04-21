@@ -123,14 +123,14 @@ public class GameView extends Scene{
 	myMapRenderer.build();
 	
 	
-//	gl.glGenTextures(6, _skybox, 0);
-//	for (int i=0;i<6;i++){
-//	    skyboxTextures[i] = makeTexture(gl,textureNames[i]); // for the sky box
+	gl.glGenTextures(6, _skybox, 0);
+	for (int i=0;i<6;i++){
+	    skyboxTextures[i] = makeTexture(gl,textureNames[i]); // for the sky box
 	    
-//	}
+	}
 	
-//	gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_S, GL2.GL_CLAMP);
-//	gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_T, GL2.GL_CLAMP);
+	gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_S, GL2.GL_CLAMP);
+	gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_T, GL2.GL_CLAMP);
 	
 	gl.glEnable(GLLightingFunc.GL_NORMALIZE);
 	gl.glEnable(GLLightingFunc.GL_COLOR_MATERIAL);
@@ -148,7 +148,7 @@ public class GameView extends Scene{
 	    gl.glEndList();
 	    isCompiled = true;
 	}
-//	createSkybox(gl,glu,glut);
+	createSkybox(gl,glu,glut);
 	gl.glScalef(myScale, myScale * HEIGHT_RATIO, myScale);
 	gl.glCallList(MAP_ID);
 	
@@ -174,7 +174,7 @@ public class GameView extends Scene{
 	    gl.glDisable(GLLightingFunc.GL_LIGHTING);
 	    gl.glDisable(gl.GL_BLEND);
 	    // Just in case we set all vertices to white.
-	    gl.glColor4f(1,0,0,1);
+	    gl.glColor4f(0,0,1,1);
 	 
 	    // Render the front quad
 	    skyboxTextures[0].enable(gl);
@@ -256,7 +256,7 @@ public class GameView extends Scene{
     public void setCamera(GL2 gl, GLU glu, GLUT glut) {
 	glu.gluLookAt(xPos, yPos, zPos, // from position
 		xLookAt, yLookAt, zLookAt, // to position
-		0, 1, 0); // up direction
+		0, 1, 0);		 // up direction
 
     }
 
@@ -413,9 +413,9 @@ public class GameView extends Scene{
 	else if (zPos > FLOOR_LEN / 2)
 	    zPos = FLOOR_LEN / 2;
 
-	System.out.print(xPos);
-	System.out.print(" ");
-	System.out.println(zPos);
+//	System.out.print(xPos);
+//	System.out.print(" ");
+//	System.out.println(zPos);
 
 	xLookAt = (float) (xPos + (xStep * LOOK_AT_DIST));
 	zLookAt = (float) (zPos + (zStep * LOOK_AT_DIST));
