@@ -1,8 +1,12 @@
 package view;
 
+import java.awt.Cursor;
+import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.Image;
 import java.awt.MouseInfo;
 import java.awt.Point;
+import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
@@ -52,8 +56,8 @@ public class GameView extends Scene {
     Texture[] skyboxTextures = new Texture[7];
     private final int MAP_ID = 1;
     private final float HEIGHT_RATIO = 0.25f;
-    private final double SCREEN_WIDTH_CENTER = 350;
-    private final double SCREEN_HEIGHT_CENTER = 350;
+    private final double SCREEN_WIDTH_CENTER = 1366/2;
+    private final double SCREEN_HEIGHT_CENTER = 768/2;
     private double MOVEMENT_INCRE = 0.1;
     private final double WALKING_SPEED = 0.1;
     private final double RUNNING_SPEED = 0.2;
@@ -74,7 +78,7 @@ public class GameView extends Scene {
     private boolean INIT_DONE = false;
     private boolean RESET_VIEW = false;
     private boolean isCompiled = false;
-    private boolean IS_RUNNING = false;
+    private boolean IS_RUNNING = true;
     private boolean MOVE_FORWARD = false;
     private boolean MOVE_BACKWARD = false;
     private boolean MOVE_RIGHT = false;
@@ -110,7 +114,11 @@ public class GameView extends Scene {
 
     @Override
     public void init(GL2 gl, GLU glu, GLUT glut) {
-
+	Image cursorImage = Toolkit.getDefaultToolkit().getImage("src/img/crosshair.gif");
+	Cursor blankCursor = Toolkit.getDefaultToolkit().createCustomCursor(cursorImage, new Point( 0, 0), "reticle" );
+//	myFrame.setCursor(blankCursor);
+	myFrame.setCursor( new Cursor (Cursor.CROSSHAIR_CURSOR) );
+	
 	myRenderMode = GL2GL3.GL_QUADS;
 	myScale = 0.05f;
 	myStepSize = 1;
@@ -145,19 +153,20 @@ public class GameView extends Scene {
 	gl.glEnable(GLLightingFunc.GL_COLOR_MATERIAL);
 
 	try {
-//	    myModel = new OBJModel(myModelFile);
+	    myModel = new OBJModel(myModelFile);
 //	    System.out.println(myModel);
 	} catch (OBJException e) {
 	    System.out.println("Cannot load " + myModelFile);
 	    e.printStackTrace();
 	    System.exit(0);
 	}
+	
+	
 
     }
 
     @Override
     public void display(GL2 gl, GLU glu, GLUT glut) {
-
 	if (!isCompiled) {
 	    gl.glDeleteLists(MAP_ID, 1);
 	    gl.glNewList(MAP_ID, GL2.GL_COMPILE);
@@ -175,7 +184,7 @@ public class GameView extends Scene {
 	gl.glTranslatef(-xPos+10f, yPos+10f, zPos);
 	gl.glScalef(50,50,50);
 	gl.glPolygonMode(GL2.GL_FRONT_AND_BACK, myRenderMode);
-//        myModel.render(gl);
+        myModel.render(gl);
         gl.glPolygonMode(GL2.GL_FRONT_AND_BACK, GL2.GL_FILL);	
 	gl.glPopMatrix();
     }
@@ -445,13 +454,13 @@ public class GameView extends Scene {
 
 	// Rotate Left
 	if (xDelta > MOUSE_CENTER_TOLERANCE) {
-	    viewAngle += ANGLE_INCRE;
+	    viewAngle += ANGLE_INCRE*2;
 	    xStep = (float) Math.cos(Math.toRadians(viewAngle));
 	    zStep = (float) Math.sin(Math.toRadians(viewAngle));
 	}
 	// Rotate Right
 	if (xDelta < -MOUSE_CENTER_TOLERANCE) {
-	    viewAngle -= ANGLE_INCRE;
+	    viewAngle -= ANGLE_INCRE*2;
 	    xStep = (float) Math.cos(Math.toRadians(viewAngle));
 	    zStep = (float) Math.sin(Math.toRadians(viewAngle));
 	}
@@ -473,9 +482,9 @@ public class GameView extends Scene {
 	else if (zPos > FLOOR_LEN / 2)
 	    zPos = FLOOR_LEN / 2;
 
-	 System.out.print(xPos);
-	 System.out.print(" ");
-	 System.out.println(zPos);
+//	 System.out.print(xPos);
+//	 System.out.print(" ");
+//	 System.out.println(zPos);
 
 	xLookAt = (float) (xPos + (xStep * LOOK_AT_DIST));
 	zLookAt = (float) (zPos + (zStep * LOOK_AT_DIST));
@@ -511,6 +520,11 @@ public class GameView extends Scene {
 	Point newMouseLocation = MouseInfo.getPointerInfo().getLocation();
 	xDelta = newMouseLocation.getX() - SCREEN_WIDTH_CENTER;
 	yDelta = newMouseLocation.getY() - SCREEN_HEIGHT_CENTER;
+	
+//	System.out.print(newMouseLocation.getX());
+//	System.out.print(" ");
+//	System.out.println(newMouseLocation.getY());
+	
 	myMouseLocation = newMouseLocation;
 
     }
@@ -557,8 +571,8 @@ public class GameView extends Scene {
 
     public static void main(String[] args) {
 
-	myFrame = new JOGLFrame(new GameView(args));
-	myFrame.setResizable(false);
+	myFrame = new JOGLFrame(new GameView(args),new Dimension(1366,768));
+	
     }
 
 }
