@@ -50,7 +50,9 @@ public class GameView extends Scene{
     private final float HEIGHT_RATIO = 0.25f;
     private final double SCREEN_WIDTH_CENTER = 350;
     private final double SCREEN_HEIGHT_CENTER = 350;
-    private final double MOVEMENT_INCRE = 0.1;
+    private double MOVEMENT_INCRE = 0.1;
+    private final double WALKING_SPEED = 0.1;
+    private final double RUNNING_SPEED = 0.2;
     private final int MOUSE_CENTER_TOLERANCE = 50;
 
     private final static double LOOK_AT_DIST = 100;
@@ -68,6 +70,7 @@ public class GameView extends Scene{
     private boolean INIT_DONE = false;
     private boolean RESET_VIEW = false;
     private boolean isCompiled = false;
+    private boolean IS_RUNNING = false;
     private boolean MOVE_FORWARD = false;
     private boolean MOVE_BACKWARD = false;
     private boolean MOVE_RIGHT = false;
@@ -294,7 +297,7 @@ public class GameView extends Scene{
     public void keyPressed(int keyCode) {
 	switch (keyCode) {
 	case KeyEvent.VK_R:
-	    RESET_VIEW = true;
+	    IS_RUNNING=!IS_RUNNING;
 	    break;
 	case KeyEvent.VK_PERIOD:
 	    myScale += 0.01f;
@@ -332,6 +335,7 @@ public class GameView extends Scene{
      */
     @Override
     public void animate(GL2 gl, GLU glu, GLUT glut) {
+	
 	if (!INIT_DONE) {
 	    gl.glPushMatrix();
 	    INIT_DONE = true;
@@ -341,6 +345,14 @@ public class GameView extends Scene{
 	    RESET_VIEW = false;
 	    INIT_DONE = false;
 	}
+	
+	if (IS_RUNNING){
+	    MOVEMENT_INCRE=RUNNING_SPEED;
+	}
+	else{
+	    MOVEMENT_INCRE=WALKING_SPEED;
+	}
+	
 	if (MOTION_JUMP > 0) {
 	    gl.glTranslatef(0, -HEIGHT_INCRE, 0);
 	    MOTION_JUMP -= 1;
