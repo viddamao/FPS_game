@@ -1,5 +1,6 @@
 package view;
 
+import java.awt.Font;
 import java.awt.MouseInfo;
 import java.awt.Point;
 import java.awt.event.KeyEvent;
@@ -28,23 +29,26 @@ import javax.swing.JFrame;
 import model.Face;
 
 import com.jogamp.opengl.swt.GLCanvas;
+import com.jogamp.opengl.util.awt.TextRenderer;
 import com.jogamp.opengl.util.gl2.GLUT;
 import com.jogamp.opengl.util.texture.Texture;
 import com.jogamp.opengl.util.texture.TextureData;
 import com.jogamp.opengl.util.texture.TextureIO;
 
 import framework.JOGLFrame;
+import framework.OBJException;
+import framework.OBJModel;
 import framework.Pixmap;
 import framework.Scene;
 
-public class GameView extends Scene{
+public class GameView extends Scene {
 
     private static JOGLFrame myFrame;
     private final String DEFAULT_MAP_FILE = "src/img/iceworld_0.bmp";
-    String[] textureNames = new String[]{
-	    "src/img/skybox_fr.rgb","src/img/skybox_lf.rgb","src/img/skybox_bk.rgb",
-	    "src/img/skybox_rt.rgb","src/img/skybox_up.rgb","src/img/skybox_dn.rgb",
-        };
+    String[] textureNames = new String[] { "src/img/skybox_fr.rgb",
+	    "src/img/skybox_lf.rgb", "src/img/skybox_bk.rgb",
+	    "src/img/skybox_rt.rgb", "src/img/skybox_up.rgb",
+	    "src/img/skybox_dn.rgb", };
     Texture[] skyboxTextures = new Texture[7];
     private final int MAP_ID = 1;
     private final float HEIGHT_RATIO = 0.25f;
@@ -87,10 +91,12 @@ public class GameView extends Scene{
     private double xDelta;
     private double yDelta;
     private int MOTION_JUMP = -MAX_JUMP_HEIGHT;
-    private int[] _skybox={1,2,3,4,5,6};
+    private int[] _skybox = { 1, 2, 3, 4, 5, 6 };
+    private OBJModel myModel;
+    private String myModelFile = "src/img/tommy-gun.obj";
 
     public GameView(String[] args) {
-	super("Counter Strike v0.1");
+	super("Counter Strike v0.10");
 	String name = (args.length > 1) ? args[0] : DEFAULT_MAP_FILE;
 	try {
 	    myHeightMap = new Pixmap((args.length > 1) ? args[0]
@@ -109,7 +115,7 @@ public class GameView extends Scene{
 	myScale = 0.05f;
 	myStepSize = 1;
 	viewAngle = 90;
-	
+
 	xStep = (float) Math.cos(Math.toRadians(viewAngle)); // step distances
 	zStep = (float) Math.sin(Math.toRadians(viewAngle));
 
@@ -120,23 +126,32 @@ public class GameView extends Scene{
 	myMouseLocation = MouseInfo.getPointerInfo().getLocation();
 
 	myRenderMode = GL2GL3.GL_QUADS;
-	
+
 	myMapRenderer = MapRenderer.getMapRenderer();
 	myMapRenderer.init(myHeightMap, myStepSize);
 	myMapRenderer.build();
-	
-	
+
 	gl.glGenTextures(6, _skybox, 0);
-	for (int i=0;i<6;i++){
-	    skyboxTextures[i] = makeTexture(gl,textureNames[i]); // for the sky box
-	    
+	for (int i = 0; i < 6; i++) {
+	    skyboxTextures[i] = makeTexture(gl, textureNames[i]); // for the sky
+								  // box
+
 	}
-	
+
 	gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_S, GL2.GL_CLAMP);
 	gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_T, GL2.GL_CLAMP);
-	
+
 	gl.glEnable(GLLightingFunc.GL_NORMALIZE);
 	gl.glEnable(GLLightingFunc.GL_COLOR_MATERIAL);
+
+	try {
+	    myModel = new OBJModel(myModelFile);
+	    System.out.println(myModel);
+	} catch (OBJException e) {
+	    System.out.println("Cannot load " + myModelFile);
+	    e.printStackTrace();
+	    System.exit(0);
+	}
 
     }
 
@@ -151,102 +166,129 @@ public class GameView extends Scene{
 	    gl.glEndList();
 	    isCompiled = true;
 	}
-	createSkybox(gl,glu,glut);
+	createSkybox(gl, glu, glut);
 	gl.glScalef(myScale, myScale * HEIGHT_RATIO, myScale);
 	gl.glCallList(MAP_ID);
 	
+	//Gun model
+	gl.glPushMatrix();
+	gl.glTranslatef(xPos+10f, yPos+10f, zPos);
+	gl.glScalef(50,50,50);
+	gl.glPolygonMode(GL2.GL_FRONT_AND_BACK, myRenderMode);
+        myModel.render(gl);
+        gl.glPolygonMode(GL2.GL_FRONT_AND_BACK, GL2.GL_FILL);	
+	gl.glPopMatrix();
     }
 
-    
-    private void createSkybox(GL2 gl,GLU glu,GLUT glut) {
-	    gl.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
-	 // Store the current matrix
-	    gl.glPushMatrix();
-	 
-	    // Reset and transform the matrix.
-	    gl.glLoadIdentity();
-	    glu.gluLookAt(
-	        0,0,0,
-	        xLookAt,yLookAt,zLookAt,
-	        0,1,0);
-	 
-	    // Enable/Disable features
-	    gl.glPushAttrib(gl.GL_ENABLE_BIT);
-	    gl.glEnable(gl.GL_TEXTURE_2D);
-	    gl.glDisable(gl.GL_DEPTH_TEST);
-	    gl.glDisable(GLLightingFunc.GL_LIGHTING);
-	    gl.glDisable(gl.GL_BLEND);
-	    // Just in case we set all vertices to white.
-	    gl.glColor4f(1,1,1,1);
-	 
-	    // Render the front quad
-	    skyboxTextures[0].enable(gl);
-	    skyboxTextures[0].bind(gl);
-	    gl.glBegin(gl.GL_QUADS);
-	        gl.glTexCoord2f(0, 0); gl.glVertex3f(  0.5f, -0.5f, -0.5f );
-	        gl.glTexCoord2f(1, 0); gl.glVertex3f( -0.5f, -0.5f, -0.5f );
-	        gl.glTexCoord2f(1, 1); gl.glVertex3f( -0.5f,  0.5f, -0.5f );
-	        gl.glTexCoord2f(0, 1); gl.glVertex3f(  0.5f,  0.5f, -0.5f );
-	    gl.glEnd();
-	 
-	    // Render the left quad
-	    skyboxTextures[1].enable(gl);
-	    skyboxTextures[1].bind(gl);
-	    gl.glBegin(gl.GL_QUADS);
-	        gl.glTexCoord2f(0, 0); gl.glVertex3f(  0.5f, -0.5f,  0.5f );
-	        gl.glTexCoord2f(1, 0); gl.glVertex3f(  0.5f, -0.5f, -0.5f );
-	        gl.glTexCoord2f(1, 1); gl.glVertex3f(  0.5f,  0.5f, -0.5f );
-	        gl.glTexCoord2f(0, 1); gl.glVertex3f(  0.5f,  0.5f,  0.5f );
-	    gl.glEnd();
-	 
-	    // Render the back quad
-	    skyboxTextures[2].enable(gl);
-	    skyboxTextures[2].bind(gl);
-	    gl.glBegin(gl.GL_QUADS);
-	        gl.glTexCoord2f(0, 0); gl.glVertex3f( -0.5f, -0.5f,  0.5f );
-	        gl.glTexCoord2f(1, 0); gl.glVertex3f(  0.5f, -0.5f,  0.5f );
-	        gl.glTexCoord2f(1, 1); gl.glVertex3f(  0.5f,  0.5f,  0.5f );
-	        gl.glTexCoord2f(0, 1); gl.glVertex3f( -0.5f,  0.5f,  0.5f );
-	 
-	    gl.glEnd();
-	 
-	    // Render the right quad
-	    skyboxTextures[3].enable(gl);
-	    skyboxTextures[3].bind(gl);
-	    gl.glBegin(gl.GL_QUADS);
-	        gl.glTexCoord2f(0, 0); gl.glVertex3f( -0.5f, -0.5f, -0.5f );
-	        gl.glTexCoord2f(1, 0); gl.glVertex3f( -0.5f, -0.5f,  0.5f );
-	        gl.glTexCoord2f(1, 1); gl.glVertex3f( -0.5f,  0.5f,  0.5f );
-	        gl.glTexCoord2f(0, 1); gl.glVertex3f( -0.5f,  0.5f, -0.5f );
-	    gl.glEnd();
-	 
-	    
-	    // Render the top quad
-	    skyboxTextures[4].enable(gl);
-	    skyboxTextures[4].bind(gl);
-	    gl.glBegin(gl.GL_QUADS);
-	        gl.glTexCoord2f(0, 1); gl.glVertex3f( -0.5f,  0.5f, -0.5f );
-	        gl.glTexCoord2f(0, 0); gl.glVertex3f( -0.5f,  0.5f,  0.5f );
-	        gl.glTexCoord2f(1, 0); gl.glVertex3f(  0.5f,  0.5f,  0.5f );
-	        gl.glTexCoord2f(1, 1); gl.glVertex3f(  0.5f,  0.5f, -0.5f );
-	    gl.glEnd();
-	 
-	    // Render the bottom quad
-	    skyboxTextures[5].enable(gl);
-	    skyboxTextures[5].bind(gl);
-	    gl.glBegin(gl.GL_QUADS);
-	        gl.glTexCoord2f(0, 0); gl.glVertex3f( -0.5f, -0.5f, -0.5f );
-	        gl.glTexCoord2f(0, 1); gl.glVertex3f( -0.5f, -0.5f,  0.5f );
-	        gl.glTexCoord2f(1, 1); gl.glVertex3f(  0.5f, -0.5f,  0.5f );
-	        gl.glTexCoord2f(1, 0); gl.glVertex3f(  0.5f, -0.5f, -0.5f );
-	    gl.glEnd();
-	 
-	    // Restore enable bits and matrix
-	    gl.glPopAttrib();
-	    gl.glPopMatrix();
+    private void createSkybox(GL2 gl, GLU glu, GLUT glut) {
+	gl.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
+	// Store the current matrix
+	gl.glPushMatrix();
+
+	// Reset and transform the matrix.
+	gl.glLoadIdentity();
+	glu.gluLookAt(0, 0, 0, xLookAt, yLookAt, zLookAt, 0, 1, 0);
+
+	// Enable/Disable features
+	gl.glPushAttrib(gl.GL_ENABLE_BIT);
+	gl.glEnable(gl.GL_TEXTURE_2D);
+	gl.glDisable(gl.GL_DEPTH_TEST);
+	gl.glDisable(GLLightingFunc.GL_LIGHTING);
+	gl.glDisable(gl.GL_BLEND);
+	// Just in case we set all vertices to white.
+	gl.glColor4f(1, 1, 1, 1);
+
+	// Render the front quad
+	skyboxTextures[0].enable(gl);
+	skyboxTextures[0].bind(gl);
+	gl.glBegin(gl.GL_QUADS);
+	gl.glTexCoord2f(0, 0);
+	gl.glVertex3f(0.5f, -0.5f, -0.5f);
+	gl.glTexCoord2f(1, 0);
+	gl.glVertex3f(-0.5f, -0.5f, -0.5f);
+	gl.glTexCoord2f(1, 1);
+	gl.glVertex3f(-0.5f, 0.5f, -0.5f);
+	gl.glTexCoord2f(0, 1);
+	gl.glVertex3f(0.5f, 0.5f, -0.5f);
+	gl.glEnd();
+
+	// Render the left quad
+	skyboxTextures[1].enable(gl);
+	skyboxTextures[1].bind(gl);
+	gl.glBegin(gl.GL_QUADS);
+	gl.glTexCoord2f(0, 0);
+	gl.glVertex3f(0.5f, -0.5f, 0.5f);
+	gl.glTexCoord2f(1, 0);
+	gl.glVertex3f(0.5f, -0.5f, -0.5f);
+	gl.glTexCoord2f(1, 1);
+	gl.glVertex3f(0.5f, 0.5f, -0.5f);
+	gl.glTexCoord2f(0, 1);
+	gl.glVertex3f(0.5f, 0.5f, 0.5f);
+	gl.glEnd();
+
+	// Render the back quad
+	skyboxTextures[2].enable(gl);
+	skyboxTextures[2].bind(gl);
+	gl.glBegin(gl.GL_QUADS);
+	gl.glTexCoord2f(0, 0);
+	gl.glVertex3f(-0.5f, -0.5f, 0.5f);
+	gl.glTexCoord2f(1, 0);
+	gl.glVertex3f(0.5f, -0.5f, 0.5f);
+	gl.glTexCoord2f(1, 1);
+	gl.glVertex3f(0.5f, 0.5f, 0.5f);
+	gl.glTexCoord2f(0, 1);
+	gl.glVertex3f(-0.5f, 0.5f, 0.5f);
+
+	gl.glEnd();
+
+	// Render the right quad
+	skyboxTextures[3].enable(gl);
+	skyboxTextures[3].bind(gl);
+	gl.glBegin(gl.GL_QUADS);
+	gl.glTexCoord2f(0, 0);
+	gl.glVertex3f(-0.5f, -0.5f, -0.5f);
+	gl.glTexCoord2f(1, 0);
+	gl.glVertex3f(-0.5f, -0.5f, 0.5f);
+	gl.glTexCoord2f(1, 1);
+	gl.glVertex3f(-0.5f, 0.5f, 0.5f);
+	gl.glTexCoord2f(0, 1);
+	gl.glVertex3f(-0.5f, 0.5f, -0.5f);
+	gl.glEnd();
+
+	// Render the top quad
+	skyboxTextures[4].enable(gl);
+	skyboxTextures[4].bind(gl);
+	gl.glBegin(gl.GL_QUADS);
+	gl.glTexCoord2f(0, 1);
+	gl.glVertex3f(-0.5f, 0.5f, -0.5f);
+	gl.glTexCoord2f(0, 0);
+	gl.glVertex3f(-0.5f, 0.5f, 0.5f);
+	gl.glTexCoord2f(1, 0);
+	gl.glVertex3f(0.5f, 0.5f, 0.5f);
+	gl.glTexCoord2f(1, 1);
+	gl.glVertex3f(0.5f, 0.5f, -0.5f);
+	gl.glEnd();
+
+	// Render the bottom quad
+	skyboxTextures[5].enable(gl);
+	skyboxTextures[5].bind(gl);
+	gl.glBegin(gl.GL_QUADS);
+	gl.glTexCoord2f(0, 0);
+	gl.glVertex3f(-0.5f, -0.5f, -0.5f);
+	gl.glTexCoord2f(0, 1);
+	gl.glVertex3f(-0.5f, -0.5f, 0.5f);
+	gl.glTexCoord2f(1, 1);
+	gl.glVertex3f(0.5f, -0.5f, 0.5f);
+	gl.glTexCoord2f(1, 0);
+	gl.glVertex3f(0.5f, -0.5f, -0.5f);
+	gl.glEnd();
+
+	// Restore enable bits and matrix
+	gl.glPopAttrib();
+	gl.glPopMatrix();
 
     }
-    
+
     private void drawMap(GL2 gl, GLU glu, GLUT glut) {
 	gl.glBegin(myRenderMode);
 	{
@@ -264,7 +306,7 @@ public class GameView extends Scene{
     public void setCamera(GL2 gl, GLU glu, GLUT glut) {
 	glu.gluLookAt(xPos, yPos, zPos, // from position
 		xLookAt, yLookAt, zLookAt, // to position
-		0, 1, 0);		 // up direction
+		0, 1, 0); // up direction
 
     }
 
@@ -297,7 +339,7 @@ public class GameView extends Scene{
     public void keyPressed(int keyCode) {
 	switch (keyCode) {
 	case KeyEvent.VK_R:
-	    IS_RUNNING=!IS_RUNNING;
+	    IS_RUNNING = !IS_RUNNING;
 	    break;
 	case KeyEvent.VK_PERIOD:
 	    myScale += 0.01f;
@@ -324,9 +366,10 @@ public class GameView extends Scene{
 	    OBJECT_DESCEND = true;
 	    break;
 	case KeyEvent.VK_SPACE:
-	    if (MOTION_JUMP == -MAX_JUMP_HEIGHT){
+	    if (MOTION_JUMP == -MAX_JUMP_HEIGHT) {
 		MOTION_JUMP = MAX_JUMP_HEIGHT;
-	    };
+	    }
+	    ;
 	}
     }
 
@@ -335,7 +378,7 @@ public class GameView extends Scene{
      */
     @Override
     public void animate(GL2 gl, GLU glu, GLUT glut) {
-	
+
 	if (!INIT_DONE) {
 	    gl.glPushMatrix();
 	    INIT_DONE = true;
@@ -345,14 +388,13 @@ public class GameView extends Scene{
 	    RESET_VIEW = false;
 	    INIT_DONE = false;
 	}
-	
-	if (IS_RUNNING){
-	    MOVEMENT_INCRE=RUNNING_SPEED;
+
+	if (IS_RUNNING) {
+	    MOVEMENT_INCRE = RUNNING_SPEED;
+	} else {
+	    MOVEMENT_INCRE = WALKING_SPEED;
 	}
-	else{
-	    MOVEMENT_INCRE=WALKING_SPEED;
-	}
-	
+
 	if (MOTION_JUMP > 0) {
 	    gl.glTranslatef(0, -HEIGHT_INCRE, 0);
 	    MOTION_JUMP -= 1;
@@ -372,9 +414,9 @@ public class GameView extends Scene{
 	    gl.glTranslatef(0, 0.1f, 0);
 	    OBJECT_DESCEND = false;
 	}
-	
-	float xPos_bak=xPos,zPos_bak=zPos;
-	
+
+	float xPos_bak = xPos, zPos_bak = zPos;
+
 	if (MOVE_RIGHT) {
 	    xPos -= zStep * MOVEMENT_INCRE;
 	    zPos += xStep * MOVEMENT_INCRE;
@@ -395,12 +437,12 @@ public class GameView extends Scene{
 	    zPos -= zStep * MOVEMENT_INCRE;
 	    MOVE_BACKWARD = false;
 	}
-	
-	if (collisionCheck(xPos,zPos)){
-	    xPos=xPos_bak;
-	    zPos=zPos_bak;
+
+	if (collisionCheck(xPos, zPos)) {
+	    xPos = xPos_bak;
+	    zPos = zPos_bak;
 	}
-	
+
 	// Rotate Left
 	if (xDelta > MOUSE_CENTER_TOLERANCE) {
 	    viewAngle += ANGLE_INCRE;
@@ -413,7 +455,7 @@ public class GameView extends Scene{
 	    xStep = (float) Math.cos(Math.toRadians(viewAngle));
 	    zStep = (float) Math.sin(Math.toRadians(viewAngle));
 	}
-	
+
 	if (yDelta > MOUSE_CENTER_TOLERANCE) {
 	    gl.glRotatef(ANGLE_INCRE, 1, 0, 0);
 	}
@@ -431,10 +473,9 @@ public class GameView extends Scene{
 	else if (zPos > FLOOR_LEN / 2)
 	    zPos = FLOOR_LEN / 2;
 
-	
-//	System.out.print(xPos);
-//	System.out.print(" ");
-//	System.out.println(zPos);
+	// System.out.print(xPos);
+	// System.out.print(" ");
+	// System.out.println(zPos);
 
 	xLookAt = (float) (xPos + (xStep * LOOK_AT_DIST));
 	zLookAt = (float) (zPos + (zStep * LOOK_AT_DIST));
@@ -478,28 +519,29 @@ public class GameView extends Scene{
      * Called when the mouse is pressed within the canvas and it hits something.
      */
 
-   
     @Override
     public void selectObject(GL2 gl, GLU glu, GLUT glut, int numSelected,
 	    int[] selectInfo) {
 	// by default, do nothing
     }
-    
+
     private Texture makeTexture(GL2 gl, String name) {
-   	try {
-   	    InputStream stream = new FileInputStream(name);
-   	    Texture result = TextureIO.newTexture(stream, false, "rgb");
-//   	     result.setTexParameteri(gl,gl.GL_TEXTURE_MAG_FILTER, gl.GL_NEAREST);
-//   	     result.setTexParameteri(gl,gl.GL_TEXTURE_MIN_FILTER, gl.GL_NEAREST);
-   	    return result;
-   	} catch (IOException e) {
-   	    System.err.println("Unable to load texture image: " + name);
-   	    e.printStackTrace();
-   	    // should never happen
-   	    return null;
-   	}
-       }
-    
+	try {
+	    InputStream stream = new FileInputStream(name);
+	    Texture result = TextureIO.newTexture(stream, false, "rgb");
+	    // result.setTexParameteri(gl,gl.GL_TEXTURE_MAG_FILTER,
+	    // gl.GL_NEAREST);
+	    // result.setTexParameteri(gl,gl.GL_TEXTURE_MIN_FILTER,
+	    // gl.GL_NEAREST);
+	    return result;
+	} catch (IOException e) {
+	    System.err.println("Unable to load texture image: " + name);
+	    e.printStackTrace();
+	    // should never happen
+	    return null;
+	}
+    }
+
     public static void main(String[] args) {
 
 	myFrame = new JOGLFrame(new GameView(args));
