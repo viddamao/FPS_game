@@ -56,8 +56,8 @@ public class GameView extends Scene {
     Texture[] skyboxTextures = new Texture[7];
     private final int MAP_ID = 1;
     private final float HEIGHT_RATIO = 0.25f;
-    private final double SCREEN_WIDTH_CENTER = 1366/2;
-    private final double SCREEN_HEIGHT_CENTER = 768/2;
+    private final double SCREEN_WIDTH_CENTER = 1366 / 2;
+    private final double SCREEN_HEIGHT_CENTER = 768 / 2;
     private double MOVEMENT_INCRE = 0.1;
     private final double WALKING_SPEED = 0.1;
     private final double RUNNING_SPEED = 0.2;
@@ -99,7 +99,6 @@ public class GameView extends Scene {
     private OBJModel myModel;
     private String myModelFile = "src/img/tommy-gun.obj";
     private String mySpriteModelFile = "src/img/soldier.obj";
-    
 
     public GameView(String[] args) {
 	super("Counter Strike v0.10");
@@ -116,11 +115,13 @@ public class GameView extends Scene {
 
     @Override
     public void init(GL2 gl, GLU glu, GLUT glut) {
-	Image cursorImage = Toolkit.getDefaultToolkit().getImage("src/img/crosshair.gif");
-	Cursor blankCursor = Toolkit.getDefaultToolkit().createCustomCursor(cursorImage, new Point( 0, 0), "reticle" );
-//	myFrame.setCursor(blankCursor);
-	myFrame.setCursor( new Cursor (Cursor.CROSSHAIR_CURSOR) );
-	
+	Image cursorImage = Toolkit.getDefaultToolkit().getImage(
+		"src/img/crosshair.gif");
+	Cursor blankCursor = Toolkit.getDefaultToolkit().createCustomCursor(
+		cursorImage, new Point(0, 0), "reticle");
+	// myFrame.setCursor(blankCursor);
+	myFrame.setCursor(new Cursor(Cursor.CROSSHAIR_CURSOR));
+
 	myRenderMode = GL2GL3.GL_QUADS;
 	myScale = 0.05f;
 	myStepSize = 1;
@@ -156,14 +157,12 @@ public class GameView extends Scene {
 
 	try {
 	    myModel = new OBJModel(mySpriteModelFile);
-//	    System.out.println(myModel);
+	    // System.out.println(myModel);
 	} catch (OBJException e) {
 	    System.out.println("Cannot load " + mySpriteModelFile);
 	    e.printStackTrace();
 	    System.exit(0);
 	}
-	
-	
 
     }
 
@@ -180,14 +179,14 @@ public class GameView extends Scene {
 	createSkybox(gl, glu, glut);
 	gl.glScalef(myScale, myScale * HEIGHT_RATIO, myScale);
 	gl.glCallList(MAP_ID);
-	
-	//Gun model
+
+	// Gun model
 	gl.glPushMatrix();
-	gl.glTranslatef(-xPos+10f, yPos+20f, zPos);
-	gl.glScalef(30,200,30);
+	gl.glTranslatef(-xPos + 10f, yPos + 20f, zPos);
+	gl.glScalef(30, 200, 30);
 	gl.glPolygonMode(GL2.GL_FRONT_AND_BACK, myRenderMode);
-        myModel.render(gl);
-        gl.glPolygonMode(GL2.GL_FRONT_AND_BACK, GL2.GL_FILL);	
+	myModel.render(gl);
+	gl.glPolygonMode(GL2.GL_FRONT_AND_BACK, GL2.GL_FILL);
 	gl.glPopMatrix();
     }
 
@@ -456,13 +455,13 @@ public class GameView extends Scene {
 
 	// Rotate Left
 	if (xDelta > MOUSE_CENTER_TOLERANCE) {
-	    viewAngle += ANGLE_INCRE*2;
+	    viewAngle += ANGLE_INCRE * 2;
 	    xStep = (float) Math.cos(Math.toRadians(viewAngle));
 	    zStep = (float) Math.sin(Math.toRadians(viewAngle));
 	}
 	// Rotate Right
 	if (xDelta < -MOUSE_CENTER_TOLERANCE) {
-	    viewAngle -= ANGLE_INCRE*2;
+	    viewAngle -= ANGLE_INCRE * 2;
 	    xStep = (float) Math.cos(Math.toRadians(viewAngle));
 	    zStep = (float) Math.sin(Math.toRadians(viewAngle));
 	}
@@ -484,27 +483,27 @@ public class GameView extends Scene {
 	else if (zPos > FLOOR_LEN / 2)
 	    zPos = FLOOR_LEN / 2;
 
-//	 System.out.print(xPos);
-//	 System.out.print(" ");
-//	 System.out.println(zPos);
+	// System.out.print(xPos);
+	// System.out.print(" ");
+	// System.out.println(zPos);
 
 	xLookAt = (float) (xPos + (xStep * LOOK_AT_DIST));
 	zLookAt = (float) (zPos + (zStep * LOOK_AT_DIST));
     }
 
     private boolean collisionCheck(float x, float z) {
-	float[][] collisionModel={{-13.5f,14f,-2.7f,2f},//Zhuzi SW
-		{-13.5f,18f,-11.5f,14f},//Qiang SW
-		{-0.5f,24f,1.1f,19.7f},//Qiang W
-		{2.8f,14f,15.8f,2f},//Zhuzi NW
-		{13.7f,18f,15.8f,14f},//Qiang NW
-		
-		{-13.5f,-2.7f,-2.7f,-13.5f},//Qiang SE
-		{2.8f,-2.7f,15.8f,-13.5f}//Qiang NE
+	float[][] collisionModel = { { -13.5f, 14f, -2.7f, 2f },// Zhuzi SW
+		{ -13.5f, 18f, -11.5f, 14f },// Qiang SW
+		{ -0.5f, 24f, 1.1f, 19.7f },// Qiang W
+		{ 2.8f, 14f, 15.8f, 2f },// Zhuzi NW
+		{ 13.7f, 18f, 15.8f, 14f },// Qiang NW
+
+		{ -13.5f, -2.7f, -2.7f, -13.5f },// Qiang SE
+		{ 2.8f, -2.7f, 15.8f, -13.5f } // Qiang NE
 	};
-	for (float[] i:collisionModel){
-	    if ((i[0]<=z)&&(i[1]>=x)&&(i[2]>=z)&&(i[3]<=x)){
-		return true;    
+	for (float[] i : collisionModel) {
+	    if ((i[0] <= z) && (i[1] >= x) && (i[2] >= z) && (i[3] <= x)) {
+		return true;
 	    }
 	}
 	return false;
@@ -522,11 +521,11 @@ public class GameView extends Scene {
 	Point newMouseLocation = MouseInfo.getPointerInfo().getLocation();
 	xDelta = newMouseLocation.getX() - SCREEN_WIDTH_CENTER;
 	yDelta = newMouseLocation.getY() - SCREEN_HEIGHT_CENTER;
-	
-//	System.out.print(newMouseLocation.getX());
-//	System.out.print(" ");
-//	System.out.println(newMouseLocation.getY());
-	
+
+	// System.out.print(newMouseLocation.getX());
+	// System.out.print(" ");
+	// System.out.println(newMouseLocation.getY());
+
 	myMouseLocation = newMouseLocation;
 
     }
@@ -573,8 +572,8 @@ public class GameView extends Scene {
 
     public static void main(String[] args) {
 
-	myFrame = new JOGLFrame(new GameView(args),new Dimension(1366,768));
-	
+	myFrame = new JOGLFrame(new GameView(args), new Dimension(1366, 768));
+
     }
 
 }
