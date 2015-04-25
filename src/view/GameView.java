@@ -28,6 +28,11 @@ import javax.media.opengl.GLEventListener;
 import javax.media.opengl.GLProfile;
 import javax.media.opengl.fixedfunc.GLLightingFunc;
 import javax.media.opengl.glu.GLU;
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
+import javax.sound.sampled.LineUnavailableException;
+import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.JFrame;
 
 import model.Face;
@@ -182,8 +187,8 @@ public class GameView extends Scene {
 
 	// sprite model
 	gl.glPushMatrix();
-	gl.glTranslatef(-xPos + 10f, yPos + 50f, zPos);
-	gl.glScalef(30, 100, 30);
+	gl.glTranslatef(-xPos + 10f, yPos + 60f, zPos);
+	gl.glScalef(30, 120, 30);
 	gl.glPolygonMode(GL2.GL_FRONT_AND_BACK, myRenderMode);
 	myModel.render(gl);
 	gl.glPolygonMode(GL2.GL_FRONT_AND_BACK, GL2.GL_FILL);
@@ -192,19 +197,20 @@ public class GameView extends Scene {
 	
 	//Reticle
 	gl.glPushMatrix();
-	glu.gluLookAt(0, 0, 0, // from position
-		0, 1, 0, // to position
-		0, 0, 1); // up direction
-	gl.glColor3f(0, 0, 0);
-//	gl.glTranslatef(0, yPos, 0);
-	gl.glBegin(GL.GL_LINE_LOOP);
-	for(int i =0; i <= 360; i++){
-	double angle = 2 * Math.PI * i / 360;
-	double x = Math.cos(angle);
-	double y = Math.sin(angle);
-	gl.glVertex2d(x,y);
-	}
+	gl.glTranslatef(xPos, yPos, zPos);
+	gl.glEnable(GL.GL_BLEND);
+	gl.glBegin(GL.GL_TRIANGLE_STRIP);
+	gl.glColor3f( 1,1,1);
+	gl.glVertex3f( 50,270,0);
+	gl.glVertex3f( 100,30,0);
+	gl.glColor3f( 1,0,0);
+	gl.glVertex3f( 58,270,0);
+	gl.glVertex3f( 108,30,0);
+	gl.glColor3f( 1,1,1);
+	gl.glVertex3f( 50,270,0);
+	gl.glVertex3f( 100,30,0);
 	gl.glEnd();
+	gl.glDisable(GL.GL_BLEND);	
 	gl.glPopMatrix();
     }
 
@@ -446,21 +452,25 @@ public class GameView extends Scene {
 	float xPos_bak = xPos, zPos_bak = zPos;
 
 	if (MOVE_RIGHT) {
+	    playMovementSound();
 	    xPos -= zStep * MOVEMENT_INCRE;
 	    zPos += xStep * MOVEMENT_INCRE;
 	    MOVE_RIGHT = false;
 	}
 	if (MOVE_LEFT) {
+	    playMovementSound();
 	    xPos += zStep * MOVEMENT_INCRE;
 	    zPos -= xStep * MOVEMENT_INCRE;
 	    MOVE_LEFT = false;
 	}
 	if (MOVE_FORWARD) {
+	    playMovementSound();
 	    xPos += xStep * MOVEMENT_INCRE;
 	    zPos += zStep * MOVEMENT_INCRE;
 	    MOVE_FORWARD = false;
 	}
 	if (MOVE_BACKWARD) {
+	    playMovementSound();
 	    xPos -= xStep * MOVEMENT_INCRE;
 	    zPos -= zStep * MOVEMENT_INCRE;
 	    MOVE_BACKWARD = false;
@@ -507,6 +517,42 @@ public class GameView extends Scene {
 
 	xLookAt = (float) (xPos + (xStep * LOOK_AT_DIST));
 	zLookAt = (float) (zPos + (zStep * LOOK_AT_DIST));
+    }
+
+    private void playMovementSound() {
+	File soundFile1 = new File("src/sound/pl_step1.wav");
+	File soundFile2 = new File("src/sound/pl_step2.wav");
+	File soundFile3 = new File("src/sound/pl_step3.wav");
+	File soundFile4 = new File("src/sound/pl_step4.wav");
+	
+	try {
+	    AudioInputStream audioIn1 = AudioSystem.getAudioInputStream(soundFile1);
+	    AudioInputStream audioIn2 = AudioSystem.getAudioInputStream(soundFile2);
+	    AudioInputStream audioIn3 = AudioSystem.getAudioInputStream(soundFile3);
+	    AudioInputStream audioIn4 = AudioSystem.getAudioInputStream(soundFile4);
+	    
+	    Clip clip = AudioSystem.getClip();
+	    clip.open(audioIn1);
+	    clip.start();
+	    clip.close();
+	    clip.open(audioIn2);
+	    clip.start();
+	    clip.close();
+	    clip.open(audioIn3);
+	    clip.start();
+	    clip.close(); 
+	    clip.open(audioIn4);
+	    clip.start();
+	    clip.close();
+	    if (clip.isRunning()) clip.stop();
+	    
+	} catch (UnsupportedAudioFileException | IOException e) {
+	    // TODO Auto-generated catch block
+	    e.printStackTrace();
+	} catch (LineUnavailableException e) {
+	    // TODO Auto-generated catch block
+	    e.printStackTrace();
+	}
     }
 
     private boolean collisionCheck(float x, float z) {
@@ -559,6 +605,28 @@ public class GameView extends Scene {
     @Override
     public void mouseClicked(Point pt, int button) {
 	// by default, do nothing
+	File soundFile1 = new File("src/sound/ak47-1.wav");
+	File soundFile2 = new File("src/sound/ak47-2.wav");
+	
+	try {
+	    AudioInputStream audioIn1 = AudioSystem.getAudioInputStream(soundFile1);
+	    AudioInputStream audioIn2 = AudioSystem.getAudioInputStream(soundFile2);
+		
+	    Clip clip = AudioSystem.getClip();
+	    clip.open(audioIn1);
+	    clip.start();
+	    clip.close();
+	    clip.open(audioIn2);
+	    clip.start();
+	    clip.close();
+	    if (clip.isRunning()) clip.stop();
+	} catch (UnsupportedAudioFileException | IOException e) {
+	    // TODO Auto-generated catch block
+	    e.printStackTrace();
+	} catch (LineUnavailableException e) {
+	    // TODO Auto-generated catch block
+	    e.printStackTrace();
+	}
     }
 
     /**
