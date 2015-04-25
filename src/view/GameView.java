@@ -43,6 +43,8 @@ public class GameView extends Scene {
 	    "src/img/skybox/skybox_lf.rgb", "src/img/skybox/skybox_bk.rgb",
 	    "src/img/skybox/skybox_rt.rgb", "src/img/skybox/skybox_up.rgb",
 	    "src/img/skybox/skybox_dn.rgb", };
+    private String movementSoundFileName="src/sound/run.wav";
+    private String reloadSoundFileName="src/sound/ak47_clipout.wav";
     Texture[] skyboxTextures = new Texture[7];
     private final int MAP_ID = 1;
     private final float HEIGHT_RATIO = 0.25f;
@@ -433,25 +435,25 @@ public class GameView extends Scene {
 	float xPos_bak = xPos, zPos_bak = zPos;
 
 	if (MOVE_RIGHT) {
-	    playMovementSound();
+	    playSound(movementSoundFileName);
 	    xPos -= zStep * MOVEMENT_INCRE;
 	    zPos += xStep * MOVEMENT_INCRE;
 	    MOVE_RIGHT = false;
 	}
 	if (MOVE_LEFT) {
-	    playMovementSound();
+	    playSound(movementSoundFileName);
 	    xPos += zStep * MOVEMENT_INCRE;
 	    zPos -= xStep * MOVEMENT_INCRE;
 	    MOVE_LEFT = false;
 	}
 	if (MOVE_FORWARD) {
-	    playMovementSound();
+	    playSound(movementSoundFileName);
 	    xPos += xStep * MOVEMENT_INCRE;
 	    zPos += zStep * MOVEMENT_INCRE;
 	    MOVE_FORWARD = false;
 	}
 	if (MOVE_BACKWARD) {
-	    playMovementSound();
+	    playSound(movementSoundFileName);
 	    xPos -= xStep * MOVEMENT_INCRE;
 	    zPos -= zStep * MOVEMENT_INCRE;
 	    MOVE_BACKWARD = false;
@@ -500,8 +502,8 @@ public class GameView extends Scene {
 	zLookAt = (float) (zPos + (zStep * LOOK_AT_DIST));
     }
 
-    private void playMovementSound() {
-	File soundFile1 = new File("src/sound/run.wav");
+    private void playSound(String fileName) {
+	File soundFile1 = new File(fileName);
 	try {
 	    if (PLAY_COUNTER!=10)
 		PLAY_COUNTER++;
