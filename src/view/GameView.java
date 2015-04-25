@@ -2,30 +2,20 @@ package view;
 
 import java.awt.Cursor;
 import java.awt.Dimension;
-import java.awt.Font;
 import java.awt.Image;
 import java.awt.MouseInfo;
 import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
-import java.awt.event.MouseEvent;
-import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.List;
 
-import javax.imageio.ImageIO;
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 import javax.media.opengl.GL2GL3;
-import javax.media.opengl.GLAutoDrawable;
-import javax.media.opengl.GLCapabilities;
-import javax.media.opengl.GLEventListener;
-import javax.media.opengl.GLProfile;
 import javax.media.opengl.fixedfunc.GLLightingFunc;
 import javax.media.opengl.glu.GLU;
 import javax.sound.sampled.AudioInputStream;
@@ -33,15 +23,10 @@ import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.UnsupportedAudioFileException;
-import javax.swing.JFrame;
-
 import model.Face;
 
-import com.jogamp.opengl.swt.GLCanvas;
-import com.jogamp.opengl.util.awt.TextRenderer;
 import com.jogamp.opengl.util.gl2.GLUT;
 import com.jogamp.opengl.util.texture.Texture;
-import com.jogamp.opengl.util.texture.TextureData;
 import com.jogamp.opengl.util.texture.TextureIO;
 
 import framework.JOGLFrame;
@@ -96,7 +81,6 @@ public class GameView extends Scene {
     private float xLookAt = 0, yLookAt = 0, zLookAt = 100;
     private float xStep, zStep;
     private float viewAngle;
-    private Point myMouseLocation;
     private double xDelta;
     private double yDelta;
     private int MOTION_JUMP = -MAX_JUMP_HEIGHT;
@@ -122,9 +106,6 @@ public class GameView extends Scene {
     public void init(GL2 gl, GLU glu, GLUT glut) {
 	Image cursorImage = Toolkit.getDefaultToolkit().getImage(
 		"src/img/crosshair.gif");
-	Cursor blankCursor = Toolkit.getDefaultToolkit().createCustomCursor(
-		cursorImage, new Point(0, 0), "reticle");
-	// myFrame.setCursor(blankCursor);
 	myFrame.setCursor(new Cursor(Cursor.CROSSHAIR_CURSOR));
 
 	myRenderMode = GL2GL3.GL_QUADS;
@@ -139,7 +120,7 @@ public class GameView extends Scene {
 	yLookAt = 0;
 	zLookAt = (float) (zPos + (LOOK_AT_DIST * zStep));
 	isCompiled = false;
-	myMouseLocation = MouseInfo.getPointerInfo().getLocation();
+	MouseInfo.getPointerInfo().getLocation();
 
 	myRenderMode = GL2GL3.GL_QUADS;
 
@@ -193,24 +174,23 @@ public class GameView extends Scene {
 	myModel.render(gl);
 	gl.glPolygonMode(GL2.GL_FRONT_AND_BACK, GL2.GL_FILL);
 	gl.glPopMatrix();
-	
-	
-	//Reticle
+
+	// Reticle
 	gl.glPushMatrix();
 	gl.glTranslatef(xPos, yPos, zPos);
 	gl.glEnable(GL.GL_BLEND);
 	gl.glBegin(GL.GL_TRIANGLE_STRIP);
-	gl.glColor3f( 1,1,1);
-	gl.glVertex3f( 50,270,0);
-	gl.glVertex3f( 100,30,0);
-	gl.glColor3f( 1,0,0);
-	gl.glVertex3f( 58,270,0);
-	gl.glVertex3f( 108,30,0);
-	gl.glColor3f( 1,1,1);
-	gl.glVertex3f( 50,270,0);
-	gl.glVertex3f( 100,30,0);
+	gl.glColor3f(1, 1, 1);
+	gl.glVertex3f(50, 270, 0);
+	gl.glVertex3f(100, 30, 0);
+	gl.glColor3f(1, 0, 0);
+	gl.glVertex3f(58, 270, 0);
+	gl.glVertex3f(108, 30, 0);
+	gl.glColor3f(1, 1, 1);
+	gl.glVertex3f(50, 270, 0);
+	gl.glVertex3f(100, 30, 0);
 	gl.glEnd();
-	gl.glDisable(GL.GL_BLEND);	
+	gl.glDisable(GL.GL_BLEND);
 	gl.glPopMatrix();
     }
 
@@ -224,18 +204,18 @@ public class GameView extends Scene {
 	glu.gluLookAt(0, 0, 0, xLookAt, yLookAt, zLookAt, 0, 1, 0);
 
 	// Enable/Disable features
-	gl.glPushAttrib(gl.GL_ENABLE_BIT);
-	gl.glEnable(gl.GL_TEXTURE_2D);
-	gl.glDisable(gl.GL_DEPTH_TEST);
+	gl.glPushAttrib(GL2.GL_ENABLE_BIT);
+	gl.glEnable(GL.GL_TEXTURE_2D);
+	gl.glDisable(GL.GL_DEPTH_TEST);
 	gl.glDisable(GLLightingFunc.GL_LIGHTING);
-	gl.glDisable(gl.GL_BLEND);
+	gl.glDisable(GL.GL_BLEND);
 	// Just in case we set all vertices to white.
 	gl.glColor4f(1, 1, 1, 1);
 
 	// Render the front quad
 	skyboxTextures[0].enable(gl);
 	skyboxTextures[0].bind(gl);
-	gl.glBegin(gl.GL_QUADS);
+	gl.glBegin(GL2GL3.GL_QUADS);
 	gl.glTexCoord2f(0, 0);
 	gl.glVertex3f(0.5f, -0.5f, -0.5f);
 	gl.glTexCoord2f(1, 0);
@@ -249,7 +229,7 @@ public class GameView extends Scene {
 	// Render the left quad
 	skyboxTextures[1].enable(gl);
 	skyboxTextures[1].bind(gl);
-	gl.glBegin(gl.GL_QUADS);
+	gl.glBegin(GL2GL3.GL_QUADS);
 	gl.glTexCoord2f(0, 0);
 	gl.glVertex3f(0.5f, -0.5f, 0.5f);
 	gl.glTexCoord2f(1, 0);
@@ -263,7 +243,7 @@ public class GameView extends Scene {
 	// Render the back quad
 	skyboxTextures[2].enable(gl);
 	skyboxTextures[2].bind(gl);
-	gl.glBegin(gl.GL_QUADS);
+	gl.glBegin(GL2GL3.GL_QUADS);
 	gl.glTexCoord2f(0, 0);
 	gl.glVertex3f(-0.5f, -0.5f, 0.5f);
 	gl.glTexCoord2f(1, 0);
@@ -278,7 +258,7 @@ public class GameView extends Scene {
 	// Render the right quad
 	skyboxTextures[3].enable(gl);
 	skyboxTextures[3].bind(gl);
-	gl.glBegin(gl.GL_QUADS);
+	gl.glBegin(GL2GL3.GL_QUADS);
 	gl.glTexCoord2f(0, 0);
 	gl.glVertex3f(-0.5f, -0.5f, -0.5f);
 	gl.glTexCoord2f(1, 0);
@@ -292,7 +272,7 @@ public class GameView extends Scene {
 	// Render the top quad
 	skyboxTextures[4].enable(gl);
 	skyboxTextures[4].bind(gl);
-	gl.glBegin(gl.GL_QUADS);
+	gl.glBegin(GL2GL3.GL_QUADS);
 	gl.glTexCoord2f(0, 1);
 	gl.glVertex3f(-0.5f, 0.5f, -0.5f);
 	gl.glTexCoord2f(0, 0);
@@ -306,7 +286,7 @@ public class GameView extends Scene {
 	// Render the bottom quad
 	skyboxTextures[5].enable(gl);
 	skyboxTextures[5].bind(gl);
-	gl.glBegin(gl.GL_QUADS);
+	gl.glBegin(GL2GL3.GL_QUADS);
 	gl.glTexCoord2f(0, 0);
 	gl.glVertex3f(-0.5f, -0.5f, -0.5f);
 	gl.glTexCoord2f(0, 1);
@@ -524,13 +504,17 @@ public class GameView extends Scene {
 	File soundFile2 = new File("src/sound/pl_step2.wav");
 	File soundFile3 = new File("src/sound/pl_step3.wav");
 	File soundFile4 = new File("src/sound/pl_step4.wav");
-	
+
 	try {
-	    AudioInputStream audioIn1 = AudioSystem.getAudioInputStream(soundFile1);
-	    AudioInputStream audioIn2 = AudioSystem.getAudioInputStream(soundFile2);
-	    AudioInputStream audioIn3 = AudioSystem.getAudioInputStream(soundFile3);
-	    AudioInputStream audioIn4 = AudioSystem.getAudioInputStream(soundFile4);
-	    
+	    AudioInputStream audioIn1 = AudioSystem
+		    .getAudioInputStream(soundFile1);
+	    AudioInputStream audioIn2 = AudioSystem
+		    .getAudioInputStream(soundFile2);
+	    AudioInputStream audioIn3 = AudioSystem
+		    .getAudioInputStream(soundFile3);
+	    AudioInputStream audioIn4 = AudioSystem
+		    .getAudioInputStream(soundFile4);
+
 	    Clip clip = AudioSystem.getClip();
 	    clip.open(audioIn1);
 	    clip.start();
@@ -540,17 +524,18 @@ public class GameView extends Scene {
 	    clip.close();
 	    clip.open(audioIn3);
 	    clip.start();
-	    clip.close(); 
+	    clip.close();
 	    clip.open(audioIn4);
 	    clip.start();
 	    clip.close();
-	    if (clip.isRunning()) clip.stop();
-	    
+	    if (clip.isRunning())
+		clip.stop();
+
 	} catch (UnsupportedAudioFileException | IOException e) {
-	    // TODO Auto-generated catch block
+	    System.out.println("unsupported audio file");
 	    e.printStackTrace();
 	} catch (LineUnavailableException e) {
-	    // TODO Auto-generated catch block
+	    System.out.println("Line unavailable");
 	    e.printStackTrace();
 	}
     }
@@ -590,8 +575,6 @@ public class GameView extends Scene {
 	// System.out.print(" ");
 	// System.out.println(newMouseLocation.getY());
 
-	myMouseLocation = newMouseLocation;
-
     }
 
     /**
@@ -604,27 +587,32 @@ public class GameView extends Scene {
      */
     @Override
     public void mouseClicked(Point pt, int button) {
-	// by default, do nothing
+	// play fire sound effect
 	File soundFile1 = new File("src/sound/ak47-1.wav");
 	File soundFile2 = new File("src/sound/ak47-2.wav");
-	
+
 	try {
-	    AudioInputStream audioIn1 = AudioSystem.getAudioInputStream(soundFile1);
-	    AudioInputStream audioIn2 = AudioSystem.getAudioInputStream(soundFile2);
-		
+	    AudioInputStream audioIn1 = AudioSystem
+		    .getAudioInputStream(soundFile1);
+	    AudioInputStream audioIn2 = AudioSystem
+		    .getAudioInputStream(soundFile2);
+
 	    Clip clip = AudioSystem.getClip();
 	    clip.open(audioIn1);
+	    clip.setFramePosition(0);
 	    clip.start();
 	    clip.close();
 	    clip.open(audioIn2);
+	    clip.setFramePosition(0);
 	    clip.start();
 	    clip.close();
-	    if (clip.isRunning()) clip.stop();
+	    if (clip.isRunning())
+		clip.stop();
 	} catch (UnsupportedAudioFileException | IOException e) {
-	    // TODO Auto-generated catch block
+	    System.out.println("unsupported audio file");
 	    e.printStackTrace();
 	} catch (LineUnavailableException e) {
-	    // TODO Auto-generated catch block
+	    System.out.println("Line unavailable");
 	    e.printStackTrace();
 	}
     }
