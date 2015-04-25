@@ -88,6 +88,7 @@ public class GameView extends Scene {
     private OBJModel myModel;
     private String myModelFile = "src/img/tommy-gun.obj";
     private String mySpriteModelFile = "src/img/soldier.obj";
+    private int PLAY_COUNTER=0;
 
     public GameView(String[] args) {
 	super("Counter Strike v0.10");
@@ -500,37 +501,22 @@ public class GameView extends Scene {
     }
 
     private void playMovementSound() {
-	File soundFile1 = new File("src/sound/pl_step1.wav");
-	File soundFile2 = new File("src/sound/pl_step2.wav");
-	File soundFile3 = new File("src/sound/pl_step3.wav");
-	File soundFile4 = new File("src/sound/pl_step4.wav");
-
+	File soundFile1 = new File("src/sound/run.wav");
 	try {
+	    if (PLAY_COUNTER!=10)
+		PLAY_COUNTER++;
+	    else{
+		PLAY_COUNTER=0;
 	    AudioInputStream audioIn1 = AudioSystem
 		    .getAudioInputStream(soundFile1);
-	    AudioInputStream audioIn2 = AudioSystem
-		    .getAudioInputStream(soundFile2);
-	    AudioInputStream audioIn3 = AudioSystem
-		    .getAudioInputStream(soundFile3);
-	    AudioInputStream audioIn4 = AudioSystem
-		    .getAudioInputStream(soundFile4);
 
 	    Clip clip = AudioSystem.getClip();
 	    clip.open(audioIn1);
-	    clip.start();
-	    clip.close();
-	    clip.open(audioIn2);
-	    clip.start();
-	    clip.close();
-	    clip.open(audioIn3);
-	    clip.start();
-	    clip.close();
-	    clip.open(audioIn4);
-	    clip.start();
-	    clip.close();
 	    if (clip.isRunning())
 		clip.stop();
-
+	    clip.start();
+	    clip.loop(0);
+	    }
 	} catch (UnsupportedAudioFileException | IOException e) {
 	    System.out.println("unsupported audio file");
 	    e.printStackTrace();
@@ -587,36 +573,56 @@ public class GameView extends Scene {
      */
     @Override
     public void mouseClicked(Point pt, int button) {
-	// play fire sound effect
-	File soundFile1 = new File("src/sound/ak47-1.wav");
-	File soundFile2 = new File("src/sound/ak47-2.wav");
-
-	try {
-	    AudioInputStream audioIn1 = AudioSystem
-		    .getAudioInputStream(soundFile1);
-	    AudioInputStream audioIn2 = AudioSystem
-		    .getAudioInputStream(soundFile2);
-
-	    Clip clip = AudioSystem.getClip();
-	    clip.open(audioIn1);
-	    clip.setFramePosition(0);
-	    clip.start();
-	    clip.close();
-	    clip.open(audioIn2);
-	    clip.setFramePosition(0);
-	    clip.start();
-	    clip.close();
-	    if (clip.isRunning())
-		clip.stop();
-	} catch (UnsupportedAudioFileException | IOException e) {
-	    System.out.println("unsupported audio file");
-	    e.printStackTrace();
-	} catch (LineUnavailableException e) {
-	    System.out.println("Line unavailable");
-	    e.printStackTrace();
-	}
+//	// play fire sound effect
+//	File soundFile1 = new File("src/sound/ak47-1.wav");
+//
+//	try {
+//	    AudioInputStream audioIn1 = AudioSystem
+//		    .getAudioInputStream(soundFile1);
+//
+//	    Clip clip = AudioSystem.getClip();
+//	    clip.open(audioIn1);
+//	    clip.setFramePosition(0);
+//	    clip.start();
+//	    clip.loop(1);
+//	} catch (UnsupportedAudioFileException | IOException e) {
+//	    System.out.println("unsupported audio file");
+//	    e.printStackTrace();
+//	} catch (LineUnavailableException e) {
+//	    System.out.println("Line unavailable");
+//	    e.printStackTrace();
+//	}
     }
 
+    
+    /**
+     * Respond to the press of the mouse.
+     *
+     * @param pt current position of the mouse
+     * @param button mouse button that was pressed
+     */
+    public void mousePressed (Point pt, int button) {
+	// play fire sound effect
+		File soundFile1 = new File("src/sound/ak47-1.wav");
+
+		try {
+		    AudioInputStream audioIn1 = AudioSystem
+			    .getAudioInputStream(soundFile1);
+
+		    Clip clip = AudioSystem.getClip();
+		    clip.open(audioIn1);
+		    clip.setFramePosition(0);
+		    clip.start();
+		    clip.loop(1);
+		} catch (UnsupportedAudioFileException | IOException e) {
+		    System.out.println("unsupported audio file");
+		    e.printStackTrace();
+		} catch (LineUnavailableException e) {
+		    System.out.println("Line unavailable");
+		    e.printStackTrace();
+		}
+    }
+    
     /**
      * Called when the mouse is pressed within the canvas and it hits something.
      */
