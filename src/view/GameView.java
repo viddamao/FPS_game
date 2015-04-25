@@ -180,13 +180,31 @@ public class GameView extends Scene {
 	gl.glScalef(myScale, myScale * HEIGHT_RATIO, myScale);
 	gl.glCallList(MAP_ID);
 
-	// Gun model
+	// sprite model
 	gl.glPushMatrix();
-	gl.glTranslatef(-xPos + 10f, yPos + 20f, zPos);
-	gl.glScalef(30, 200, 30);
+	gl.glTranslatef(-xPos + 10f, yPos + 50f, zPos);
+	gl.glScalef(30, 100, 30);
 	gl.glPolygonMode(GL2.GL_FRONT_AND_BACK, myRenderMode);
 	myModel.render(gl);
 	gl.glPolygonMode(GL2.GL_FRONT_AND_BACK, GL2.GL_FILL);
+	gl.glPopMatrix();
+	
+	
+	//Reticle
+	gl.glPushMatrix();
+	glu.gluLookAt(0, 0, 0, // from position
+		0, 1, 0, // to position
+		0, 0, 1); // up direction
+	gl.glColor3f(0, 0, 0);
+//	gl.glTranslatef(0, yPos, 0);
+	gl.glBegin(GL.GL_LINE_LOOP);
+	for(int i =0; i <= 360; i++){
+	double angle = 2 * Math.PI * i / 360;
+	double x = Math.cos(angle);
+	double y = Math.sin(angle);
+	gl.glVertex2d(x,y);
+	}
+	gl.glEnd();
 	gl.glPopMatrix();
     }
 
