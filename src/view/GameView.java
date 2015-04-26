@@ -605,6 +605,7 @@ public class GameView extends Scene {
      */
     public void mousePressed (Point pt, int button) {
 	// play fire sound effect
+		if (button == 1){
 		File soundFile1 = new File("src/sound/ak47-1.wav");
 
 		try {
@@ -622,6 +623,7 @@ public class GameView extends Scene {
 		} catch (LineUnavailableException e) {
 		    System.out.println("Line unavailable");
 		    e.printStackTrace();
+		}
 		}
     }
     
