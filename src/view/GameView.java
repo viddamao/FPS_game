@@ -11,6 +11,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.media.opengl.GL;
@@ -26,6 +27,7 @@ import javax.sound.sampled.UnsupportedAudioFileException;
 
 import model.Bot;
 import model.Face;
+import model.Vertex;
 
 import com.jogamp.opengl.util.gl2.GLUT;
 import com.jogamp.opengl.util.texture.Texture;
@@ -67,7 +69,7 @@ public class GameView extends Scene {
     private int myStepSize;
     private Pixmap myHeightMap;
     private MapRenderer myMapRenderer;
-    public Bot[] myBots=new Bot[10];
+    public ArrayList<Bot> myBots=new ArrayList<Bot>();
     public int numBot = 0;
 
     private float myScale;
@@ -156,7 +158,10 @@ public class GameView extends Scene {
 	    e.printStackTrace();
 	    System.exit(0);
 	}
-
+	Bot newBot=new Bot();
+	newBot.setzPos(20f);
+	myBots.add(newBot);
+	System.out.println(newBot.getzPos());
     }
 
     @Override
@@ -175,11 +180,14 @@ public class GameView extends Scene {
 
 	// bot models
 	gl.glPushMatrix();
-	gl.glTranslatef(-xPos + 10f, yPos + 60f, zPos);
+	for (Bot i:myBots){
+	gl.glTranslatef(-i.getxPos()/4.8f*100f, yPos + 60f, i.getzPos()/10.58f*200f);
 	gl.glScalef(30, 120, 30);
+	gl.glRotatef(i.getFacing(), 0, 1, 0);
 	gl.glPolygonMode(GL2.GL_FRONT_AND_BACK, myRenderMode);
 	myModel.render(gl);
 	gl.glPolygonMode(GL2.GL_FRONT_AND_BACK, GL2.GL_FILL);
+	}
 	gl.glPopMatrix();
 
 	// Reticle
@@ -498,9 +506,9 @@ public class GameView extends Scene {
 	else if (zPos > FLOOR_LEN / 2)
 	    zPos = FLOOR_LEN / 2;
 
-	System.out.print(xPos);
-	System.out.print(" ");
-	System.out.println(zPos);
+//	System.out.print(xPos);
+//	System.out.print(" ");
+//	System.out.println(zPos);
 
 	xLookAt = (float) (xPos + (xStep * LOOK_AT_DIST));
 	zLookAt = (float) (zPos + (zStep * LOOK_AT_DIST));
