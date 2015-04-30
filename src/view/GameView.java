@@ -105,7 +105,7 @@ public class GameView extends Scene {
     private String mySpriteModelFile = "src/img/soldier.obj";
     private int PLAY_COUNTER = 0;
     private TextRenderer renderer;
-    private int totalShells = 30;
+    private int totalShells[] = {30,7};
     private Weapon myWeapon;
 
     public GameView(String[] args) {
@@ -206,9 +206,8 @@ public class GameView extends Scene {
 	    gl.glPolygonMode(GL2.GL_FRONT_AND_BACK, GL2.GL_FILL);
 	    }
 	    else{
-	     glut.glutSolidTeapot(30);	 
+	     glut.glutSolidTeapot(0.1);	 
 	    }
-	    myWeapon.setModel(1);
 	    gl.glPopMatrix();
 	
 	// bot models
@@ -238,7 +237,9 @@ public class GameView extends Scene {
 	renderer.draw("HP", 100, 100);
 	renderer.draw(Integer.toString(myHP), 200, 100);
 	renderer.draw(Integer.toString(myShells), 1130, 100);
-	renderer.draw("/ 30", 1200, 100);
+	renderer.draw("/", 1200, 100);
+	renderer.draw(Integer.toString(totalShells[myWeapon.getModel()]), 1230, 100);
+	
 
 	renderer.endRendering();
 
@@ -426,7 +427,7 @@ public class GameView extends Scene {
 	switch (keyCode) {
 	case KeyEvent.VK_R:
 	    playSound(reloadSoundFileName);
-	    myShells = totalShells;
+	    myShells = totalShells[myWeapon.getModel()];
 	    break;
 	case KeyEvent.VK_PERIOD:
 	    myScale += 0.01f;
@@ -455,6 +456,7 @@ public class GameView extends Scene {
 	case KeyEvent.VK_G:
 	    if (xPos*xPos+zPos*zPos<4){
 		myWeapon.setModel(1-myWeapon.getModel());
+		myShells=totalShells[myWeapon.getModel()];
 	    }
 	    break;
 	case KeyEvent.VK_SPACE:
@@ -703,8 +705,9 @@ public class GameView extends Scene {
     public void mousePressed(Point pt, int button) {
 	// play fire sound effect
 	if (button == 1) {
+	    if (myShells>0){
 	    myShells--;
-	    File soundFile1 = new File("src/sound/ak47-1.wav");
+	    File soundFile1 = (myWeapon.getModel()==0)?new File("src/sound/ak47-1.wav"):new File("src/sound/deagle-1.wav");
 
 	    try {
 		AudioInputStream audioIn1 = AudioSystem
@@ -720,6 +723,7 @@ public class GameView extends Scene {
 	    } catch (LineUnavailableException e) {
 		System.out.println("Line unavailable");
 		e.printStackTrace();
+	    }
 	    }
 	}
     }
