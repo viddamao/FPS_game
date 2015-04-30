@@ -161,7 +161,11 @@ public class GameView extends Scene {
 	Bot newBot=new Bot();
 	newBot.setzPos(20f);
 	myBots.add(newBot);
-	System.out.println(newBot.getzPos());
+	Bot newBot1=new Bot();
+	newBot1.setzPos(10f);
+	myBots.add(newBot1);
+	System.out.println(myBots.size());
+	
     }
 
     @Override
@@ -179,17 +183,19 @@ public class GameView extends Scene {
 	gl.glCallList(MAP_ID);
 
 	// bot models
-	gl.glPushMatrix();
 	for (Bot i:myBots){
+
+	gl.glPushMatrix();
 	gl.glTranslatef(-i.getxPos()/4.8f*100f, yPos + 60f, i.getzPos()/10.58f*200f);
 	gl.glScalef(30, 120, 30);
 	gl.glRotatef(i.getFacing(), 0, 1, 0);
 	gl.glPolygonMode(GL2.GL_FRONT_AND_BACK, myRenderMode);
 	myModel.render(gl);
 	gl.glPolygonMode(GL2.GL_FRONT_AND_BACK, GL2.GL_FILL);
-	}
 	gl.glPopMatrix();
 
+	}
+	
 	// Reticle
 	gl.glPushMatrix();
 	gl.glTranslatef(xPos, yPos, zPos);

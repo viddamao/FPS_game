@@ -1,6 +1,6 @@
 # This file uses centimeters as units for non-parametric coordinates.
 
-# mtllib soldier.mtl
+# mtllib src/img/soldier.mtl
 g default
 v -0.659259 1.833037 0.342545
 v -0.140188 1.978204 0.354556
