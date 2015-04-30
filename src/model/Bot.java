@@ -23,11 +23,19 @@ public class Bot implements Comparable<Object>{
 	return (int) (this.getxPos()-b.getxPos());
     }
     
-    private void move(){
+
+    public void turn(float playerX,float playerZ){
+	float deltaX=xPos-playerX;
+	float deltaZ=zPos-playerZ;
+	float angle=(float) Math.toDegrees(Math.acos(((deltaX)*0+(-deltaZ))/(Math.sqrt(deltaX*deltaX+deltaZ*deltaZ))));
+	facing=deltaX<0?angle:360-angle;
+    }
+    
+    public void move(){
 	
     }
     
-    private void shoot(){
+    public void shoot(){
 	
     }
     

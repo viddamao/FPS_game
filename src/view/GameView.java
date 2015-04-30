@@ -119,7 +119,7 @@ public class GameView extends Scene {
 
 	myRenderMode = GL2GL3.GL_QUADS;
 	myScale = 0.05f;
-	myStepSize = 1;
+	myStepSize = 4;
 	viewAngle = 90;
 
 	xStep = (float) Math.cos(Math.toRadians(viewAngle)); // step distances
@@ -159,8 +159,8 @@ public class GameView extends Scene {
 	    System.exit(0);
 	}
 	Bot newBot=new Bot();
-	newBot.setzPos(20f);
-	newBot.setFacing(180);
+	newBot.setzPos(-10f);
+	newBot.setFacing(90);
 	myBots.add(newBot);
 	
 	
@@ -182,7 +182,7 @@ public class GameView extends Scene {
 
 	// bot models
 	for (Bot i:myBots){
-
+	i.turn(xPos, zPos);    
 	gl.glPushMatrix();
 	gl.glTranslatef(-i.getxPos()*20f, yPos + 70f, i.getzPos()*20f);
 	gl.glScalef(30, 110, 30);
@@ -420,6 +420,9 @@ public class GameView extends Scene {
 	    newBot.setzPos(newRandZ);
 	    myBots.add(newBot);
 	    break;
+	case KeyEvent.VK_MINUS:
+	    myBots.clear();
+	    break;
 	}
     }
 
@@ -527,9 +530,9 @@ public class GameView extends Scene {
 	else if (zPos > FLOOR_LEN / 2)
 	    zPos = FLOOR_LEN / 2;
 
-	System.out.print(xPos);
-	System.out.print(" ");
-	System.out.println(zPos);
+//	System.out.print(xPos);
+//	System.out.print(" ");
+//	System.out.println(zPos);
 
 	xLookAt = (float) (xPos + (xStep * LOOK_AT_DIST));
 	zLookAt = (float) (zPos + (zStep * LOOK_AT_DIST));
