@@ -29,6 +29,7 @@ import javax.sound.sampled.UnsupportedAudioFileException;
 import model.Bot;
 import model.Face;
 import model.Vertex;
+import model.Weapon;
 
 import com.jogamp.opengl.util.awt.TextRenderer;
 import com.jogamp.opengl.util.gl2.GLUT;
@@ -99,11 +100,13 @@ public class GameView extends Scene {
     private int MOTION_JUMP = -MAX_JUMP_HEIGHT;
     private int[] _skybox = { 1, 2, 3, 4, 5, 6 };
     private OBJModel myModel;
-    private String myModelFile = "src/img/tommy-gun.obj";
+    private OBJModel myGunModel;
+    private String myGunModelFile = "src/img/tommy-gun.obj";
     private String mySpriteModelFile = "src/img/soldier.obj";
     private int PLAY_COUNTER = 0;
     private TextRenderer renderer;
     private int totalShells = 30;
+    private Weapon myWeapon;
 
     public GameView(String[] args) {
 	super("Counter Strike v0.10");
@@ -159,6 +162,7 @@ public class GameView extends Scene {
 
 	try {
 	    myModel = new OBJModel(mySpriteModelFile);
+	    myGunModel = new OBJModel(myGunModelFile);
 	    // System.out.println(myModel);
 	} catch (OBJException e) {
 	    System.out.println("Cannot load " + mySpriteModelFile);
@@ -169,8 +173,11 @@ public class GameView extends Scene {
 	newBot.setzPos(-10f);
 	newBot.setFacing(90);
 	myBots.add(newBot);
-	renderer = new TextRenderer(new Font("SansSerif", Font.BOLD, 54));
 
+	myWeapon = new Weapon();
+	
+	renderer = new TextRenderer(new Font("SansSerif", Font.BOLD, 54));
+	
     }
 
     @Override
@@ -187,6 +194,23 @@ public class GameView extends Scene {
 	gl.glScalef(myScale, myScale * HEIGHT_RATIO, myScale);
 	gl.glCallList(MAP_ID);
 
+	//Weapon model
+	gl.glPushMatrix();
+	    gl.glTranslatef(-myWeapon.getxPos() * 20f, yPos + 60f, myWeapon.getzPos() * 20f);
+	    gl.glScalef(30, 30, 30);
+	    gl.glRotatef(myWeapon.getFacing(), 0, 1, 0);
+
+	    if (myWeapon.getModel()==1){
+	    gl.glPolygonMode(GL2.GL_FRONT_AND_BACK, myRenderMode);
+	    myGunModel.render(gl);
+	    gl.glPolygonMode(GL2.GL_FRONT_AND_BACK, GL2.GL_FILL);
+	    }
+	    else{
+	     glut.glutSolidTeapot(30);	 
+	    }
+	    myWeapon.setModel(1);
+	    gl.glPopMatrix();
+	
 	// bot models
 	for (Bot i : myBots) {
 	    i.turn(xPos, zPos);
@@ -427,6 +451,11 @@ public class GameView extends Scene {
 	    break;
 	case KeyEvent.VK_I:
 	    OBJECT_DESCEND = true;
+	    break;
+	case KeyEvent.VK_G:
+	    if (xPos*xPos+zPos*zPos<4){
+		myWeapon.setModel(1-myWeapon.getModel());
+	    }
 	    break;
 	case KeyEvent.VK_SPACE:
 	    if (MOTION_JUMP == -MAX_JUMP_HEIGHT) {
