@@ -2,6 +2,7 @@ package model;
 
 public class Bot implements Comparable<Object>{
     
+    public static int numBot=0;
     private float xPos,zPos;
 
     public Bot(){
@@ -16,5 +17,11 @@ public class Bot implements Comparable<Object>{
 	return (int) (this.xPos-b.xPos);
     }
     
+    private void move(){
+	
+    }
     
+    private void shoot(){
+	
+    }
 }

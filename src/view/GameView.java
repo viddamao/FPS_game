@@ -23,6 +23,8 @@ import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.UnsupportedAudioFileException;
+
+import model.Bot;
 import model.Face;
 
 import com.jogamp.opengl.util.gl2.GLUT;
@@ -65,6 +67,8 @@ public class GameView extends Scene {
     private int myStepSize;
     private Pixmap myHeightMap;
     private MapRenderer myMapRenderer;
+    public Bot[] myBots=new Bot[10];
+    public int numBot = 0;
 
     private float myScale;
     private boolean INIT_DONE = false;
@@ -169,7 +173,7 @@ public class GameView extends Scene {
 	gl.glScalef(myScale, myScale * HEIGHT_RATIO, myScale);
 	gl.glCallList(MAP_ID);
 
-	// sprite model
+	// bot models
 	gl.glPushMatrix();
 	gl.glTranslatef(-xPos + 10f, yPos + 60f, zPos);
 	gl.glScalef(30, 120, 30);
@@ -494,9 +498,9 @@ public class GameView extends Scene {
 	else if (zPos > FLOOR_LEN / 2)
 	    zPos = FLOOR_LEN / 2;
 
-	// System.out.print(xPos);
-	// System.out.print(" ");
-	// System.out.println(zPos);
+	System.out.print(xPos);
+	System.out.print(" ");
+	System.out.println(zPos);
 
 	xLookAt = (float) (xPos + (xStep * LOOK_AT_DIST));
 	zLookAt = (float) (zPos + (zStep * LOOK_AT_DIST));
@@ -535,8 +539,10 @@ public class GameView extends Scene {
 		{ 2.8f, 14f, 15.8f, 2f },// Zhuzi NW
 		{ 13.7f, 18f, 15.8f, 14f },// Qiang NW
 
-		{ -13.5f, -2.7f, -2.7f, -13.5f },// Qiang SE
-		{ 2.8f, -2.7f, 15.8f, -13.5f } // Qiang NE
+		{ -13.5f, -2.7f, -2.7f, -13.5f },// Zhuzi SE
+		{-13.5f,-13.5f,-11.5f,-17.6f},//Qiang SE
+		{ 2.8f, -2.7f, 15.8f, -13.5f }, // Zhuzi NE
+		{13.7f,-13.5f,15.8f,-17.6f}//Qiang NE
 	};
 	for (float[] i : collisionModel) {
 	    if ((i[0] <= z) && (i[1] >= x) && (i[2] >= z) && (i[3] <= x)) {
