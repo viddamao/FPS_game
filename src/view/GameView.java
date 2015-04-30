@@ -13,6 +13,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.ConcurrentModificationException;
 import java.util.List;
 
 import javax.media.opengl.GL;
@@ -53,7 +54,10 @@ public class GameView extends Scene {
     private String movementSoundFileName = "src/sound/run.wav";
     private String reloadSoundFileName = "src/sound/ak47_clipout.wav";
     private String addBotSoundFileName = "src/sound/com_go.wav";
+    private String winSoundFileName = "src/sound/terwin.wav";
+    private String killSoundFileName = "src/sound/die1.wav";
     
+     
     Texture[] skyboxTextures = new Texture[7];
     private final int MAP_ID = 1;
     private final float HEIGHT_RATIO = 0.25f;
@@ -108,7 +112,7 @@ public class GameView extends Scene {
     private int PLAY_COUNTER = 0;
     private TextRenderer renderer;
     private int totalShells[] = {30,7};
-    private int myShellDamage[] = {50,34};
+    private int myWeaponDamage[] = {50,34};
     private String botNames[] = {"Duvall ","Ang ","Vidda ","HeaTon ","John ","Fisker ","kingZ ","Alex ","Allen "};
     private Weapon myWeapon;
     private TextRenderer renderer1;
@@ -613,9 +617,11 @@ public class GameView extends Scene {
 	else if (zPos > FLOOR_LEN / 2)
 	    zPos = FLOOR_LEN / 2;
 
-	// System.out.print(xPos);
-	// System.out.print(" ");
-	// System.out.println(zPos);
+//	 System.out.print(xPos);
+//	 System.out.print(" ");
+//	 System.out.println(zPos);
+//	 System.out.print(" ");
+//	 System.out.println(viewAngle);
 
 	xLookAt = (float) (xPos + (xStep * LOOK_AT_DIST));
 	zLookAt = (float) (zPos + (zStep * LOOK_AT_DIST));
@@ -748,11 +754,35 @@ public class GameView extends Scene {
 		e.printStackTrace();
 	    
 	    }
-	    double dist=0;
+	    double dist=0,alpha=0,beta=0,temp=0;
+	    try{
 	    for (Bot i:myBots){
 		dist=Math.sqrt(Math.pow((xPos-i.getxPos()),2)+Math.pow((zPos-i.getzPos()),2));
 		
-	    
+		temp=(Math.atan(0.3/dist)/3.1415)*180;
+		alpha=90+temp+i.getFacing()-180;
+		beta=90-temp+i.getFacing()-180;
+		 System.out.print(alpha);
+		 System.out.print(" ");
+		 System.out.println(beta);
+		if ((viewAngle+alpha>=180)&&(viewAngle+beta<=180)){
+		    i.setHp(i.getHp()-myWeaponDamage[myWeapon.getModel()]);
+		    
+		}
+		
+		if (i.getHp()<=0){
+		    myBots.remove(i);
+		    numBot--;
+		    playSound(killSoundFileName);
+		    if (numBot==0){
+			playSound(winSoundFileName);
+			continue;
+		    }
+		}
+	    }
+	    }
+	    catch (ConcurrentModificationException e){
+		
 	    }
 	    }
 	}
