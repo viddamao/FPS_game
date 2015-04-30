@@ -2,6 +2,7 @@ package view;
 
 import java.awt.Cursor;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Image;
 import java.awt.MouseInfo;
 import java.awt.Point;
@@ -29,6 +30,7 @@ import model.Bot;
 import model.Face;
 import model.Vertex;
 
+import com.jogamp.opengl.util.awt.TextRenderer;
 import com.jogamp.opengl.util.gl2.GLUT;
 import com.jogamp.opengl.util.texture.Texture;
 import com.jogamp.opengl.util.texture.TextureIO;
@@ -64,7 +66,10 @@ public class GameView extends Scene {
     private static final float ANGLE_INCRE = 0.5f;
     private static final float HEIGHT_INCRE = 0.25f;
     private static final int MAX_JUMP_HEIGHT = 10;
-
+    
+    private int myHP=100;
+    private int myShells=30;
+    
     private int myRenderMode;
     private int myStepSize;
     private Pixmap myHeightMap;
@@ -97,6 +102,8 @@ public class GameView extends Scene {
     private String myModelFile = "src/img/tommy-gun.obj";
     private String mySpriteModelFile = "src/img/soldier.obj";
     private int PLAY_COUNTER=0;
+    private TextRenderer renderer;
+    private int totalShells=30;
 
     public GameView(String[] args) {
 	super("Counter Strike v0.10");
@@ -162,6 +169,7 @@ public class GameView extends Scene {
 	newBot.setzPos(-10f);
 	newBot.setFacing(90);
 	myBots.add(newBot);
+	renderer = new TextRenderer(new Font("SansSerif", Font.BOLD, 54));
 	
 	
     }
@@ -180,11 +188,22 @@ public class GameView extends Scene {
 	gl.glScalef(myScale, myScale * HEIGHT_RATIO, myScale);
 	gl.glCallList(MAP_ID);
 
+	//Display HP
+	renderer.beginRendering(1366,768);
+	// optionally set the color
+	renderer.setColor(0f, 1f, 0.2f, 0.8f);
+	renderer.draw("HP", 100, 100);
+	renderer.draw(Integer.toString(myHP),200 ,100);
+	renderer.draw(Integer.toString(myShells),1130 ,100);
+	renderer.draw("/ 30", 1200, 100);
+	
+	renderer.endRendering();
+	
 	// bot models
 	for (Bot i:myBots){
 	i.turn(xPos, zPos);    
 	gl.glPushMatrix();
-	gl.glTranslatef(-i.getxPos()*20f, yPos + 70f, i.getzPos()*20f);
+	gl.glTranslatef(-i.getxPos()*20f, yPos + 60f, i.getzPos()*20f);
 	gl.glScalef(30, 110, 30);
 	gl.glRotatef(i.getFacing(), 0, 1, 0);
 	gl.glPolygonMode(GL2.GL_FRONT_AND_BACK, myRenderMode);
@@ -195,21 +214,28 @@ public class GameView extends Scene {
 	}
 	
 	// Reticle
-	gl.glPushMatrix();
-	gl.glTranslatef(xPos, yPos, zPos);
-	gl.glEnable(GL.GL_BLEND);
-	gl.glBegin(GL.GL_TRIANGLE_STRIP);
-	gl.glColor3f(1, 1, 1);
-	gl.glVertex3f(50, 270, 0);
-	gl.glVertex3f(100, 30, 0);
-	gl.glColor3f(1, 0, 0);
-	gl.glVertex3f(58, 270, 0);
-	gl.glVertex3f(108, 30, 0);
-	gl.glColor3f(1, 1, 1);
-	gl.glVertex3f(50, 270, 0);
-	gl.glVertex3f(100, 30, 0);
-	gl.glEnd();
-	gl.glDisable(GL.GL_BLEND);
+//	gl.glPushMatrix();
+//	gl.glTranslatef(xPos*20, 90f, zPos*20+20f);
+//	gl.glColor3f(0f, 1f,0f);
+//	gl.glBegin(gl.GL_POLYGON);
+//	gl.glVertex3f(4.5f, 4.5f, 0.0f);
+//	gl.glVertex3f(4.5f, 10.5f, 0.0f);
+//	gl.glVertex3f(5.5f, 10.5f, 0.0f);
+//	gl.glVertex3f(4.5f, 5.5f, 0.0f);
+//	gl.glEnd();
+//	gl.glPopMatrix();
+//	
+//	gl.glPushMatrix();
+//	gl.glTranslatef(xPos*20, 90f, zPos*20+20f);
+//	gl.glColor3f(1f, 1f,1f);
+//	gl.glBegin(gl.GL_POLYGON);
+//	gl.glVertex3f(2.5f, 2.5f, 0.0f);
+//	gl.glVertex3f(7.5f, 2.5f, 0.0f);
+//	gl.glVertex3f(7.5f, 7.5f, 0.0f);
+//	gl.glVertex3f(2.5f, 7.5f, 0.0f);
+//	gl.glEnd();
+
+	
 	gl.glPopMatrix();
     }
 
@@ -372,7 +398,8 @@ public class GameView extends Scene {
     public void keyPressed(int keyCode) {
 	switch (keyCode) {
 	case KeyEvent.VK_R:
-	    IS_RUNNING = !IS_RUNNING;
+	    playSound(reloadSoundFileName);
+	    myShells=totalShells;
 	    break;
 	case KeyEvent.VK_PERIOD:
 	    myScale += 0.01f;
@@ -541,7 +568,7 @@ public class GameView extends Scene {
     private void playSound(String fileName) {
 	File soundFile1 = new File(fileName);
 	try {
-	    if (PLAY_COUNTER!=10)
+	    if ((PLAY_COUNTER!=10)&&(fileName.equals(movementSoundFileName)))
 		PLAY_COUNTER++;
 	    else{
 		PLAY_COUNTER=0;
@@ -553,7 +580,6 @@ public class GameView extends Scene {
 	    if (clip.isRunning())
 		clip.stop();
 	    clip.start();
-	    clip.loop(0);
 	    }
 	} catch (UnsupportedAudioFileException | IOException e) {
 	    System.out.println("unsupported audio file");
@@ -644,6 +670,7 @@ public class GameView extends Scene {
     public void mousePressed (Point pt, int button) {
 	// play fire sound effect
 		if (button == 1){
+		    myShells--;
 		File soundFile1 = new File("src/sound/ak47-1.wav");
 
 		try {
@@ -654,7 +681,6 @@ public class GameView extends Scene {
 		    clip.open(audioIn1);
 		    clip.setFramePosition(0);
 		    clip.start();
-		    clip.loop(1);
 		} catch (UnsupportedAudioFileException | IOException e) {
 		    System.out.println("unsupported audio file");
 		    e.printStackTrace();
