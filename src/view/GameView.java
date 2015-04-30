@@ -205,6 +205,12 @@ public class GameView extends Scene {
 	renderer.beginRendering(1366, 768);
 	// optionally set the color
 	renderer.setColor(0f, 1f, 0.2f, 0.8f);
+	
+	renderer.draw("  |  ", 1366/2-30, 768/2+30);
+	renderer.draw("__  __", 1366/2-70, 768/2);
+	renderer.draw("  |  ", 1366/2-30, 768/2-60);
+	
+	
 	renderer.draw("HP", 100, 100);
 	renderer.draw(Integer.toString(myHP), 200, 100);
 	renderer.draw(Integer.toString(myShells), 1130, 100);
