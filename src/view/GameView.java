@@ -49,8 +49,8 @@ public class GameView extends Scene {
 	    "src/img/skybox/skybox_lf.rgb", "src/img/skybox/skybox_bk.rgb",
 	    "src/img/skybox/skybox_rt.rgb", "src/img/skybox/skybox_up.rgb",
 	    "src/img/skybox/skybox_dn.rgb", };
-    private String movementSoundFileName="src/sound/run.wav";
-    private String reloadSoundFileName="src/sound/ak47_clipout.wav";
+    private String movementSoundFileName = "src/sound/run.wav";
+    private String reloadSoundFileName = "src/sound/ak47_clipout.wav";
     Texture[] skyboxTextures = new Texture[7];
     private final int MAP_ID = 1;
     private final float HEIGHT_RATIO = 0.25f;
@@ -66,15 +66,15 @@ public class GameView extends Scene {
     private static final float ANGLE_INCRE = 0.5f;
     private static final float HEIGHT_INCRE = 0.25f;
     private static final int MAX_JUMP_HEIGHT = 10;
-    
-    private int myHP=100;
-    private int myShells=30;
-    
+
+    private int myHP = 100;
+    private int myShells = 30;
+
     private int myRenderMode;
     private int myStepSize;
     private Pixmap myHeightMap;
     private MapRenderer myMapRenderer;
-    public ArrayList<Bot> myBots=new ArrayList<Bot>();
+    public ArrayList<Bot> myBots = new ArrayList<Bot>();
     public int numBot = 0;
 
     private float myScale;
@@ -101,9 +101,9 @@ public class GameView extends Scene {
     private OBJModel myModel;
     private String myModelFile = "src/img/tommy-gun.obj";
     private String mySpriteModelFile = "src/img/soldier.obj";
-    private int PLAY_COUNTER=0;
+    private int PLAY_COUNTER = 0;
     private TextRenderer renderer;
-    private int totalShells=30;
+    private int totalShells = 30;
 
     public GameView(String[] args) {
 	super("Counter Strike v0.10");
@@ -165,13 +165,12 @@ public class GameView extends Scene {
 	    e.printStackTrace();
 	    System.exit(0);
 	}
-	Bot newBot=new Bot();
+	Bot newBot = new Bot();
 	newBot.setzPos(-10f);
 	newBot.setFacing(90);
 	myBots.add(newBot);
 	renderer = new TextRenderer(new Font("SansSerif", Font.BOLD, 54));
-	
-	
+
     }
 
     @Override
@@ -188,57 +187,53 @@ public class GameView extends Scene {
 	gl.glScalef(myScale, myScale * HEIGHT_RATIO, myScale);
 	gl.glCallList(MAP_ID);
 
-	//Display HP
-	renderer.beginRendering(1366,768);
+	// bot models
+	for (Bot i : myBots) {
+	    i.turn(xPos, zPos);
+	    gl.glPushMatrix();
+	    gl.glTranslatef(-i.getxPos() * 20f, yPos + 60f, i.getzPos() * 20f);
+	    gl.glScalef(30, 110, 30);
+	    gl.glRotatef(i.getFacing(), 0, 1, 0);
+	    gl.glPolygonMode(GL2.GL_FRONT_AND_BACK, myRenderMode);
+	    myModel.render(gl);
+	    gl.glPolygonMode(GL2.GL_FRONT_AND_BACK, GL2.GL_FILL);
+	    gl.glPopMatrix();
+
+	}
+
+	// Display HP
+	renderer.beginRendering(1366, 768);
 	// optionally set the color
 	renderer.setColor(0f, 1f, 0.2f, 0.8f);
 	renderer.draw("HP", 100, 100);
-	renderer.draw(Integer.toString(myHP),200 ,100);
-	renderer.draw(Integer.toString(myShells),1130 ,100);
+	renderer.draw(Integer.toString(myHP), 200, 100);
+	renderer.draw(Integer.toString(myShells), 1130, 100);
 	renderer.draw("/ 30", 1200, 100);
-	
+
 	renderer.endRendering();
-	
-	
 
-	// bot models
-	for (Bot i:myBots){
-	i.turn(xPos, zPos);    
-	gl.glPushMatrix();
-	gl.glTranslatef(-i.getxPos()*20f, yPos + 60f, i.getzPos()*20f);
-	gl.glScalef(30, 110, 30);
-	gl.glRotatef(i.getFacing(), 0, 1, 0);
-	gl.glPolygonMode(GL2.GL_FRONT_AND_BACK, myRenderMode);
-	myModel.render(gl);
-	gl.glPolygonMode(GL2.GL_FRONT_AND_BACK, GL2.GL_FILL);
-	gl.glPopMatrix();
-
-	}
-	
 	// Reticle
-//	gl.glPushMatrix();
-//	gl.glTranslatef(xPos*20, 90f, zPos*20+20f);
-//	gl.glColor3f(0f, 1f,0f);
-//	gl.glBegin(gl.GL_POLYGON);
-//	gl.glVertex3f(4.5f, 4.5f, 0.0f);
-//	gl.glVertex3f(4.5f, 10.5f, 0.0f);
-//	gl.glVertex3f(5.5f, 10.5f, 0.0f);
-//	gl.glVertex3f(4.5f, 5.5f, 0.0f);
-//	gl.glEnd();
-//	gl.glPopMatrix();
-//	
-//	gl.glPushMatrix();
-//	gl.glTranslatef(xPos*20, 90f, zPos*20+20f);
-//	gl.glColor3f(1f, 1f,1f);
-//	gl.glBegin(gl.GL_POLYGON);
-//	gl.glVertex3f(2.5f, 2.5f, 0.0f);
-//	gl.glVertex3f(7.5f, 2.5f, 0.0f);
-//	gl.glVertex3f(7.5f, 7.5f, 0.0f);
-//	gl.glVertex3f(2.5f, 7.5f, 0.0f);
-//	gl.glEnd();
+	// gl.glPushMatrix();
+	// gl.glTranslatef(xPos*20, 90f, zPos*20+20f);
+	// gl.glColor3f(0f, 1f,0f);
+	// gl.glBegin(gl.GL_POLYGON);
+	// gl.glVertex3f(4.5f, 4.5f, 0.0f);
+	// gl.glVertex3f(4.5f, 10.5f, 0.0f);
+	// gl.glVertex3f(5.5f, 10.5f, 0.0f);
+	// gl.glVertex3f(4.5f, 5.5f, 0.0f);
+	// gl.glEnd();
+	// gl.glPopMatrix();
+	//
+	// gl.glPushMatrix();
+	// gl.glTranslatef(xPos*20, 90f, zPos*20+20f);
+	// gl.glColor3f(1f, 1f,1f);
+	// gl.glBegin(gl.GL_POLYGON);
+	// gl.glVertex3f(2.5f, 2.5f, 0.0f);
+	// gl.glVertex3f(7.5f, 2.5f, 0.0f);
+	// gl.glVertex3f(7.5f, 7.5f, 0.0f);
+	// gl.glVertex3f(2.5f, 7.5f, 0.0f);
+	// gl.glEnd();
 
-	
-	gl.glPopMatrix();
     }
 
     private void createSkybox(GL2 gl, GLU glu, GLUT glut) {
@@ -401,7 +396,7 @@ public class GameView extends Scene {
 	switch (keyCode) {
 	case KeyEvent.VK_R:
 	    playSound(reloadSoundFileName);
-	    myShells=totalShells;
+	    myShells = totalShells;
 	    break;
 	case KeyEvent.VK_PERIOD:
 	    myScale += 0.01f;
@@ -433,18 +428,17 @@ public class GameView extends Scene {
 	    }
 	    break;
 	case KeyEvent.VK_EQUALS:
-	    
-	    float newRandX=(float) ((Math.random()-1)*20f);
-	    float newRandZ=(float) ((Math.random()-1)*20f);
-	    while (collisionCheck(newRandX,newRandZ))
-	    {
-		newRandX=(float) ((Math.random()-1)*20f);
-		newRandZ=(float) ((Math.random()-1)*20f);
-		    
+
+	    float newRandX = (float) ((Math.random() - 1) * 20f);
+	    float newRandZ = (float) ((Math.random() - 1) * 20f);
+	    while (collisionCheck(newRandX, newRandZ)) {
+		newRandX = (float) ((Math.random() - 1) * 20f);
+		newRandZ = (float) ((Math.random() - 1) * 20f);
+
 	    }
-//	    System.out.println(newRandX);
-//	    System.out.println(newRandZ);
-	    Bot newBot=new Bot();
+	    // System.out.println(newRandX);
+	    // System.out.println(newRandZ);
+	    Bot newBot = new Bot();
 	    newBot.setxPos(newRandX);
 	    newBot.setzPos(newRandZ);
 	    myBots.add(newBot);
@@ -559,9 +553,9 @@ public class GameView extends Scene {
 	else if (zPos > FLOOR_LEN / 2)
 	    zPos = FLOOR_LEN / 2;
 
-//	System.out.print(xPos);
-//	System.out.print(" ");
-//	System.out.println(zPos);
+	// System.out.print(xPos);
+	// System.out.print(" ");
+	// System.out.println(zPos);
 
 	xLookAt = (float) (xPos + (xStep * LOOK_AT_DIST));
 	zLookAt = (float) (zPos + (zStep * LOOK_AT_DIST));
@@ -570,18 +564,19 @@ public class GameView extends Scene {
     private void playSound(String fileName) {
 	File soundFile1 = new File(fileName);
 	try {
-	    if ((PLAY_COUNTER!=10)&&(fileName.equals(movementSoundFileName)))
+	    if ((PLAY_COUNTER != 10)
+		    && (fileName.equals(movementSoundFileName)))
 		PLAY_COUNTER++;
-	    else{
-		PLAY_COUNTER=0;
-	    AudioInputStream audioIn1 = AudioSystem
-		    .getAudioInputStream(soundFile1);
+	    else {
+		PLAY_COUNTER = 0;
+		AudioInputStream audioIn1 = AudioSystem
+			.getAudioInputStream(soundFile1);
 
-	    Clip clip = AudioSystem.getClip();
-	    clip.open(audioIn1);
-	    if (clip.isRunning())
-		clip.stop();
-	    clip.start();
+		Clip clip = AudioSystem.getClip();
+		clip.open(audioIn1);
+		if (clip.isRunning())
+		    clip.stop();
+		clip.start();
 	    }
 	} catch (UnsupportedAudioFileException | IOException e) {
 	    System.out.println("unsupported audio file");
@@ -600,9 +595,9 @@ public class GameView extends Scene {
 		{ 13.7f, 18f, 15.8f, 14f },// Qiang NW
 
 		{ -13.5f, -2.7f, -2.7f, -13.5f },// Zhuzi SE
-		{-13.5f,-13.5f,-11.5f,-17.6f},//Qiang SE
+		{ -13.5f, -13.5f, -11.5f, -17.6f },// Qiang SE
 		{ 2.8f, -2.7f, 15.8f, -13.5f }, // Zhuzi NE
-		{13.7f,-13.5f,15.8f,-17.6f}//Qiang NE
+		{ 13.7f, -13.5f, 15.8f, -17.6f } // Qiang NE
 	};
 	for (float[] i : collisionModel) {
 	    if ((i[0] <= z) && (i[1] >= x) && (i[2] >= z) && (i[3] <= x)) {
@@ -641,58 +636,59 @@ public class GameView extends Scene {
      */
     @Override
     public void mouseClicked(Point pt, int button) {
-//	// play fire sound effect
-//	File soundFile1 = new File("src/sound/ak47-1.wav");
-//
-//	try {
-//	    AudioInputStream audioIn1 = AudioSystem
-//		    .getAudioInputStream(soundFile1);
-//
-//	    Clip clip = AudioSystem.getClip();
-//	    clip.open(audioIn1);
-//	    clip.setFramePosition(0);
-//	    clip.start();
-//	    clip.loop(1);
-//	} catch (UnsupportedAudioFileException | IOException e) {
-//	    System.out.println("unsupported audio file");
-//	    e.printStackTrace();
-//	} catch (LineUnavailableException e) {
-//	    System.out.println("Line unavailable");
-//	    e.printStackTrace();
-//	}
+	// // play fire sound effect
+	// File soundFile1 = new File("src/sound/ak47-1.wav");
+	//
+	// try {
+	// AudioInputStream audioIn1 = AudioSystem
+	// .getAudioInputStream(soundFile1);
+	//
+	// Clip clip = AudioSystem.getClip();
+	// clip.open(audioIn1);
+	// clip.setFramePosition(0);
+	// clip.start();
+	// clip.loop(1);
+	// } catch (UnsupportedAudioFileException | IOException e) {
+	// System.out.println("unsupported audio file");
+	// e.printStackTrace();
+	// } catch (LineUnavailableException e) {
+	// System.out.println("Line unavailable");
+	// e.printStackTrace();
+	// }
     }
 
-    
     /**
      * Respond to the press of the mouse.
      *
-     * @param pt current position of the mouse
-     * @param button mouse button that was pressed
+     * @param pt
+     *            current position of the mouse
+     * @param button
+     *            mouse button that was pressed
      */
-    public void mousePressed (Point pt, int button) {
+    public void mousePressed(Point pt, int button) {
 	// play fire sound effect
-		if (button == 1){
-		    myShells--;
-		File soundFile1 = new File("src/sound/ak47-1.wav");
+	if (button == 1) {
+	    myShells--;
+	    File soundFile1 = new File("src/sound/ak47-1.wav");
 
-		try {
-		    AudioInputStream audioIn1 = AudioSystem
-			    .getAudioInputStream(soundFile1);
+	    try {
+		AudioInputStream audioIn1 = AudioSystem
+			.getAudioInputStream(soundFile1);
 
-		    Clip clip = AudioSystem.getClip();
-		    clip.open(audioIn1);
-		    clip.setFramePosition(0);
-		    clip.start();
-		} catch (UnsupportedAudioFileException | IOException e) {
-		    System.out.println("unsupported audio file");
-		    e.printStackTrace();
-		} catch (LineUnavailableException e) {
-		    System.out.println("Line unavailable");
-		    e.printStackTrace();
-		}
-		}
+		Clip clip = AudioSystem.getClip();
+		clip.open(audioIn1);
+		clip.setFramePosition(0);
+		clip.start();
+	    } catch (UnsupportedAudioFileException | IOException e) {
+		System.out.println("unsupported audio file");
+		e.printStackTrace();
+	    } catch (LineUnavailableException e) {
+		System.out.println("Line unavailable");
+		e.printStackTrace();
+	    }
+	}
     }
-    
+
     /**
      * Called when the mouse is pressed within the canvas and it hits something.
      */

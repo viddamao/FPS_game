@@ -1,44 +1,46 @@
 package model;
 
-public class Bot implements Comparable<Object>{
-    
-    public static int numBot=0;
-    private float xPos,zPos,facing;
+public class Bot implements Comparable<Object> {
 
-    public Bot(){
-	float xPos=0,zPos=0,facing=180;
-	String modelFileName="";
-	
+    public static int numBot = 0;
+    private float xPos, zPos, facing;
+
+    public Bot() {
+	float xPos = 0, zPos = 0, facing = 180;
+	String modelFileName = "";
+
     }
-    
-    public Bot(float x,float z,float f){
-	float xPos=x;
-	float zPos=z;
-	float facing=f;
-	String modelFileName="";
+
+    public Bot(float x, float z, float f) {
+	float xPos = x;
+	float zPos = z;
+	float facing = f;
+	String modelFileName = "";
     }
+
     @Override
     public int compareTo(Object o) {
-	Bot b=(Bot) o;
-	return (int) (this.getxPos()-b.getxPos());
+	Bot b = (Bot) o;
+	return (int) (this.getxPos() - b.getxPos());
     }
-    
 
-    public void turn(float playerX,float playerZ){
-	float deltaX=xPos-playerX;
-	float deltaZ=zPos-playerZ;
-	float angle=(float) Math.toDegrees(Math.acos(((deltaX)*0+(-deltaZ))/(Math.sqrt(deltaX*deltaX+deltaZ*deltaZ))));
-	facing=deltaX<0?angle:360-angle;
+    public void turn(float playerX, float playerZ) {
+	float deltaX = xPos - playerX;
+	float deltaZ = zPos - playerZ;
+	float angle = (float) Math.toDegrees(Math
+		.acos(((deltaX) * 0 + (-deltaZ))
+			/ (Math.sqrt(deltaX * deltaX + deltaZ * deltaZ))));
+	facing = deltaX < 0 ? angle : 360 - angle;
     }
-    
-    public void move(){
-	
+
+    public void move() {
+
     }
-    
-    public void shoot(){
-	
+
+    public void shoot() {
+
     }
-    
+
     private boolean collisionCheck(float x, float z) {
 	float[][] collisionModel = { { -13.5f, 14f, -2.7f, 2f },// Zhuzi SW
 		{ -13.5f, 18f, -11.5f, 14f },// Qiang SW
@@ -47,9 +49,9 @@ public class Bot implements Comparable<Object>{
 		{ 13.7f, 18f, 15.8f, 14f },// Qiang NW
 
 		{ -13.5f, -2.7f, -2.7f, -13.5f },// Zhuzi SE
-		{-13.5f,-13.5f,-11.5f,-17.6f},//Qiang SE
+		{ -13.5f, -13.5f, -11.5f, -17.6f },// Qiang SE
 		{ 2.8f, -2.7f, 15.8f, -13.5f }, // Zhuzi NE
-		{13.7f,-13.5f,15.8f,-17.6f}//Qiang NE
+		{ 13.7f, -13.5f, 15.8f, -17.6f } // Qiang NE
 	};
 	for (float[] i : collisionModel) {
 	    if ((i[0] <= z) && (i[1] >= x) && (i[2] >= z) && (i[3] <= x)) {

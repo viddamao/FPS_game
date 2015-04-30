@@ -11,7 +11,6 @@ import ray.math.Vector;
  */
 public abstract class Surface {
 
-
     /**
      * Calculates true if the given ray intersects this surface.
      */
