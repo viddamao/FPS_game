@@ -160,11 +160,9 @@ public class GameView extends Scene {
 	}
 	Bot newBot=new Bot();
 	newBot.setzPos(20f);
+	newBot.setFacing(180);
 	myBots.add(newBot);
-	Bot newBot1=new Bot();
-	newBot1.setzPos(10f);
-	myBots.add(newBot1);
-	System.out.println(myBots.size());
+	
 	
     }
 
@@ -186,8 +184,8 @@ public class GameView extends Scene {
 	for (Bot i:myBots){
 
 	gl.glPushMatrix();
-	gl.glTranslatef(-i.getxPos()/4.8f*100f, yPos + 60f, i.getzPos()/10.58f*200f);
-	gl.glScalef(30, 120, 30);
+	gl.glTranslatef(-i.getxPos()*20f, yPos + 70f, i.getzPos()*20f);
+	gl.glScalef(30, 110, 30);
 	gl.glRotatef(i.getFacing(), 0, 1, 0);
 	gl.glPolygonMode(GL2.GL_FRONT_AND_BACK, myRenderMode);
 	myModel.render(gl);
@@ -404,7 +402,24 @@ public class GameView extends Scene {
 	    if (MOTION_JUMP == -MAX_JUMP_HEIGHT) {
 		MOTION_JUMP = MAX_JUMP_HEIGHT;
 	    }
-	    ;
+	    break;
+	case KeyEvent.VK_EQUALS:
+	    
+	    float newRandX=(float) ((Math.random()-1)*20f);
+	    float newRandZ=(float) ((Math.random()-1)*20f);
+	    while (collisionCheck(newRandX,newRandZ))
+	    {
+		newRandX=(float) ((Math.random()-1)*20f);
+		newRandZ=(float) ((Math.random()-1)*20f);
+		    
+	    }
+//	    System.out.println(newRandX);
+//	    System.out.println(newRandZ);
+	    Bot newBot=new Bot();
+	    newBot.setxPos(newRandX);
+	    newBot.setzPos(newRandZ);
+	    myBots.add(newBot);
+	    break;
 	}
     }
 
@@ -512,9 +527,9 @@ public class GameView extends Scene {
 	else if (zPos > FLOOR_LEN / 2)
 	    zPos = FLOOR_LEN / 2;
 
-//	System.out.print(xPos);
-//	System.out.print(" ");
-//	System.out.println(zPos);
+	System.out.print(xPos);
+	System.out.print(" ");
+	System.out.println(zPos);
 
 	xLookAt = (float) (xPos + (xStep * LOOK_AT_DIST));
 	zLookAt = (float) (zPos + (zStep * LOOK_AT_DIST));
