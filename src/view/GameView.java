@@ -52,6 +52,8 @@ public class GameView extends Scene {
 	    "src/img/skybox/skybox_dn.rgb", };
     private String movementSoundFileName = "src/sound/run.wav";
     private String reloadSoundFileName = "src/sound/ak47_clipout.wav";
+    private String addBotSoundFileName = "src/sound/com_go.wav";
+    
     Texture[] skyboxTextures = new Texture[7];
     private final int MAP_ID = 1;
     private final float HEIGHT_RATIO = 0.25f;
@@ -106,7 +108,10 @@ public class GameView extends Scene {
     private int PLAY_COUNTER = 0;
     private TextRenderer renderer;
     private int totalShells[] = {30,7};
+    private int myShellDamage[] = {50,34};
+    private String botNames[] = {"Duvall ","Ang ","Vidda ","HeaTon ","John ","Fisker ","kingZ ","Alex ","Allen "};
     private Weapon myWeapon;
+    private TextRenderer renderer1;
 
     public GameView(String[] args) {
 	super("Counter Strike v0.10");
@@ -173,11 +178,13 @@ public class GameView extends Scene {
 	newBot.setzPos(-10f);
 	newBot.setFacing(90);
 	myBots.add(newBot);
+	numBot=1;
 
 	myWeapon = new Weapon();
 	
 	renderer = new TextRenderer(new Font("SansSerif", Font.BOLD, 54));
-	
+
+	renderer1 = new TextRenderer(new Font("SansSerif", Font.BOLD, 27));
     }
 
     @Override
@@ -228,7 +235,6 @@ public class GameView extends Scene {
 	renderer.beginRendering(1366, 768);
 	// optionally set the color
 	renderer.setColor(0f, 1f, 0.2f, 0.8f);
-	
 	renderer.draw("  |  ", 1366/2-30, 768/2+30);
 	renderer.draw("__  __", 1366/2-70, 768/2);
 	renderer.draw("  |  ", 1366/2-30, 768/2-60);
@@ -240,9 +246,23 @@ public class GameView extends Scene {
 	renderer.draw("/", 1200, 100);
 	renderer.draw(Integer.toString(totalShells[myWeapon.getModel()]), 1230, 100);
 	
-
 	renderer.endRendering();
 
+	renderer1.beginRendering(1366, 768);
+	renderer1.setColor(0f, 1f, 0.2f, 0.8f);
+	renderer1.draw("Bots remaining", 500, 720);
+	renderer1.draw(Integer.toString(numBot), 730, 720);
+	
+	int currentYaxis=600,count=0;
+	for (Bot i:myBots){
+	    renderer1.draw(botNames[count], 1180, currentYaxis);
+	    renderer1.draw(Integer.toString(i.getHp()), 1300, currentYaxis);
+	    currentYaxis-=40;	
+	    count++;
+	}
+	
+	renderer1.endRendering();
+	
 	// Reticle
 	// gl.glPushMatrix();
 	// gl.glTranslatef(xPos*20, 90f, zPos*20+20f);
@@ -465,7 +485,8 @@ public class GameView extends Scene {
 	    }
 	    break;
 	case KeyEvent.VK_EQUALS:
-
+	    
+	    if (numBot>=9) break;
 	    float newRandX = (float) ((Math.random() - 1) * 20f);
 	    float newRandZ = (float) ((Math.random() - 1) * 20f);
 	    while (collisionCheck(newRandX, newRandZ)) {
@@ -479,6 +500,8 @@ public class GameView extends Scene {
 	    newBot.setxPos(newRandX);
 	    newBot.setzPos(newRandZ);
 	    myBots.add(newBot);
+	    numBot+=1;
+	    playSound(addBotSoundFileName);
 	    break;
 	case KeyEvent.VK_MINUS:
 	    myBots.clear();
@@ -723,6 +746,13 @@ public class GameView extends Scene {
 	    } catch (LineUnavailableException e) {
 		System.out.println("Line unavailable");
 		e.printStackTrace();
+	    
+	    }
+	    double dist=0;
+	    for (Bot i:myBots){
+		dist=Math.sqrt(Math.pow((xPos-i.getxPos()),2)+Math.pow((zPos-i.getzPos()),2));
+		
+	    
 	    }
 	    }
 	}

@@ -3,10 +3,12 @@ package model;
 public class Bot implements Comparable<Object> {
 
     public static int numBot = 0;
-    private float xPos, zPos, facing;
+    private float xPos, zPos, facing=180;
+    private int hp=100;
 
     public Bot() {
 	float xPos = 0, zPos = 0, facing = 180;
+	int hp=100;
 	String modelFileName = "";
 
     }
@@ -15,6 +17,7 @@ public class Bot implements Comparable<Object> {
 	float xPos = x;
 	float zPos = z;
 	float facing = f;
+	int hp=100;
 	String modelFileName = "";
     }
 
@@ -83,5 +86,13 @@ public class Bot implements Comparable<Object> {
 
     public void setFacing(float facing) {
 	this.facing = facing;
+    }
+
+    public int getHp() {
+	return hp;
+    }
+
+    public void setHp(int hp) {
+	this.hp = hp;
     }
 }
