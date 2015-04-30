@@ -199,6 +199,8 @@ public class GameView extends Scene {
 	
 	renderer.endRendering();
 	
+	
+
 	// bot models
 	for (Bot i:myBots){
 	i.turn(xPos, zPos);    
