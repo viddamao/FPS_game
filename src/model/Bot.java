@@ -37,7 +37,7 @@ public class Bot implements Comparable<Object> {
     }
 
     public void move() {
-
+	
     }
 
     public void shoot() {
